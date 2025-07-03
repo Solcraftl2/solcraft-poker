@@ -1,80 +1,50 @@
-import cn from '@/utils/cn';
-import Image from '@/components/ui/image';
-import { StaticImageData } from 'next/image';
+"use client"
 
-interface AvatarProps {
-  image: StaticImageData;
-  alt: string;
-  className?: string;
-  size?: SizeNames;
-  shape?: ShapeNames;
-  width?: number;
-  height?: number;
-}
+import * as React from "react"
+import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
-type ShapeNames = 'rounded' | 'circle';
-type SizeNames = 'xl' | 'lg' | 'md' | 'sm' | 'xs';
+import { cn } from "@/lib/utils"
 
-const sizes: Record<SizeNames, string[]> = {
-  xl: [
-    'border-white border-[5px] h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 3xl:h-40 3xl:w-40 3xl:border-8 shadow-large',
-  ],
-  lg: ['border-whitebor der-4 h-20 w-20 lg:h-24 lg:w-24'],
-  md: ['border-white h-10 w-10 drop-shadow-main border-3'],
-  sm: ['border-white h-8 w-8 border-2 shadow-card'],
-  xs: ['h-6 w-6'],
-};
+const Avatar = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Root
+    ref={ref}
+    className={cn(
+      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
+      className
+    )}
+    {...props}
+  />
+))
+Avatar.displayName = AvatarPrimitive.Root.displayName
 
-const shapes: Record<ShapeNames, string[]> = {
-  rounded: ['h-16 w-16 rounded-lg bg-white/20 p-2 backdrop-blur-[40px]'],
-  circle: ['rounded-full'],
-};
+const AvatarImage = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Image>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Image
+    ref={ref}
+    className={cn("aspect-square h-full w-full", className)}
+    {...props}
+  />
+))
+AvatarImage.displayName = AvatarPrimitive.Image.displayName
 
-function Avatar({
-  image,
-  alt,
-  className,
-  size = 'md',
-  shape = 'circle',
-  width,
-  height,
-}: AvatarProps) {
-  const sizeClassNames = sizes[size];
-  return (
-    <figure
-      className={cn(
-        'relative shrink-0 overflow-hidden',
-        className,
-        shapes[shape],
-        shape === 'circle' && sizeClassNames,
-      )}
-    >
-      {shape === 'circle' ? (
-        size === 'xs' || 'sm' ? (
-          <Image
-            src={image}
-            alt={alt}
-            width={width}
-            height={height}
-            priority
-            className="rounded-full"
-          />
-        ) : (
-          <Image
-            src={image}
-            alt={alt}
-            width={width}
-            height={height}
-            priority
-            placeholder="blur"
-            className="rounded-full"
-          />
-        )
-      ) : (
-        <Image src={image} alt={alt} className="rounded-[6px]" width={width} />
-      )}
-    </figure>
-  );
-}
+const AvatarFallback = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Fallback>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Fallback
+    ref={ref}
+    className={cn(
+      "flex h-full w-full items-center justify-center rounded-full bg-muted",
+      className
+    )}
+    {...props}
+  />
+))
+AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
-export default Avatar;
+export { Avatar, AvatarImage, AvatarFallback }

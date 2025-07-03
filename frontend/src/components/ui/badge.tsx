@@ -1,23 +1,36 @@
-interface Props {}
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
-function Badge(props: Props) {
-  return <span {...props} />;
+import { cn } from "@/lib/utils"
+
+const badgeVariants = cva(
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        outline: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  )
 }
 
-export default Badge;
-
-// display: flex;
-// flex-direction: row;
-// align-items: flex-start;
-// padding: 8px 12px;
-
-// position: absolute;
-// width: 125px;
-// height: 31px;
-// left: 515px;
-// top: 90px;
-
-// background: #373737;
-// border: 1px solid #474747;
-// box-sizing: border-box;
-// border-radius: 100px;
+export { Badge, badgeVariants }

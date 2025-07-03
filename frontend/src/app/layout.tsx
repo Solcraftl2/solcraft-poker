@@ -1,48 +1,32 @@
-import cn from '@/utils/cn';
+
 import type { Metadata } from 'next';
-import { fira_code } from './fonts';
-import { RootProvider } from '@/components/providers';
-
-// third party css files
-import 'overlayscrollbars/overlayscrollbars.css';
-import 'swiper/css';
-import 'swiper/css/pagination';
-
-// base css file
-import '@/assets/css/range-slider.css';
-import '@/assets/css/scrollbar.css';
-import '@/assets/css/globals.css';
+import './globals.css';
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Criptic',
-  description: 'Criptic - React Next Web3 NFT Crypto Dashboard Template',
+  title: 'SolCraft',
+  description: 'Trading Infrastructure for the Next Era of Solana',
   icons: {
-    icon: {
-      url: '/favicon.ico',
-    },
+    icon: '/solcraft-logo.png',
   },
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html
-      lang="en"
-      dir="ltr"
-      className={cn('light', fira_code.className)}
-      suppressHydrationWarning
-    >
+    <html lang="en" suppressHydrationWarning className="dark">
       <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1 maximum-scale=1"
-        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
-      <body suppressHydrationWarning>
-        <RootProvider>{children}</RootProvider>
+      <body className="font-body antialiased">
+        {children}
+        <Toaster />
       </body>
     </html>
   );
