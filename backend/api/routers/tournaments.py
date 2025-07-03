@@ -14,6 +14,7 @@ from ..models.tournament_models import (
 )
 from ..services.tournament_service import TournamentService
 from ..services.player_profile_service import PlayerProfileService
+from ..config.database import get_supabase_client
 from ..utils.auth import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ def get_tournament_service() -> TournamentService:
 
 # Dependency to get player profile service
 def get_player_service() -> PlayerProfileService:
-    return PlayerProfileService()
+    return PlayerProfileService(get_supabase_client())
 
 @router.post("/", response_model=TournamentResponse)
 async def create_tournament(
