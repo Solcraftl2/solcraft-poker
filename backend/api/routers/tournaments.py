@@ -37,7 +37,7 @@ async def create_tournament(
     """Create a new tournament."""
     try:
         # Get player profile to determine ranking
-        player_profile = player_service.get_player_profile(current_user["id"])
+        player_profile = await player_service.get_player_by_user_id(current_user["id"])
         if not player_profile:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
