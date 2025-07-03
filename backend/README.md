@@ -56,7 +56,7 @@ Il backend utilizza PostgreSQL su Supabase come database. La connessione è conf
 
 ## Struttura del Progetto
 
-- `/api`: Endpoint API Flask
+- `/api`: Package con router e servizi FastAPI
 - `/models`: Modelli di dati
 - `/services`: Logica di business
 - `/utils`: Utility e helper functions
