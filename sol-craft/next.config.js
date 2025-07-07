@@ -1,15 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  images: {
-    unoptimized: true
+  // Configurazione dinamica per piattaforma Web3
+  experimental: {
+    serverComponentsExternalPackages: ['@solana/web3.js']
   },
-  typescript: {
-    ignoreBuildErrors: true, // For development - set to false for production
+  webpack: (config) => {
+    config.resolve.fallback = {
+      fs: false,
+      net: false,
+      tls: false,
+    }
+    return config
   },
-  eslint: {
-    ignoreDuringBuilds: true, // For development - set to false for production
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
   }
 }
 
