@@ -94,6 +94,15 @@ npm run dev
 ### Frontend (Vercel)
 Il frontend è configurato per il deploy automatico su Vercel.
 
+### Frontend (Netlify)
+Per pubblicare il frontend su Netlify è presente il file `netlify.toml` alla
+radice del progetto. Imposta su Netlify le variabili d'ambiente previste in
+`frontend/.env.local` e avvia la build tramite `npm run build:frontend`.
+Il plugin `@netlify/next` gestisce il deploy della app Next.js. Verifica che la
+versione di Next.js utilizzata (attualmente 15) sia supportata dal plugin; in caso
+di problemi considera di effettuare il downgrade a una versione compatibile
+(es. 14).
+
 ### Backend (Railway/Heroku)
 Il backend può essere deployato su Railway, Heroku o servizi simili.
 
