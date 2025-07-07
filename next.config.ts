@@ -18,10 +18,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Netlify compatibility
-  output: 'export',
-  trailingSlash: true,
-  distDir: '.next',
 };
 
 export default nextConfig;
