@@ -16,7 +16,7 @@ Per utilizzare il workflow di deploy automatico, è necessario configurare i seg
 - `POSTGRES_URL`: URL di connessione al database PostgreSQL su Supabase
 - `DATABASE_URL`: URL di connessione al database (stesso valore di POSTGRES_URL)
 - `SUPABASE_URL`: URL del progetto Supabase
-- `SUPABASE_KEY`: Chiave API di Supabase
+ - `SUPABASE_SERVICE_ROLE_KEY`: Chiave API di Supabase
 - `JWT_SECRET`: Chiave segreta per la generazione dei token JWT
 - `SMTP_HOST`: Host del server SMTP per l'invio di email
 - `SMTP_PORT`: Porta del server SMTP
@@ -38,7 +38,7 @@ Per utilizzare il workflow di deploy automatico, è necessario configurare i seg
 
 ### Come ottenere i segreti Supabase
 
-1. **SUPABASE_URL e SUPABASE_KEY**:
+1. **SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY**:
    - Vai su https://app.supabase.io/
    - Seleziona il tuo progetto
    - Vai su Settings > API
@@ -70,7 +70,7 @@ Il backend utilizza PostgreSQL su Supabase come database. La connessione è conf
    DATABASE_URL=postgresql://postgres:postgres@db.solcraftl2.supabase.co:5432/postgres
    POSTGRES_URL=postgresql://postgres:postgres@db.solcraftl2.supabase.co:5432/postgres
    SUPABASE_URL=https://db.solcraftl2.supabase.co
-   SUPABASE_KEY=your-supabase-key
+   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
    JWT_SECRET=your-jwt-secret
    SMTP_HOST=smtp.example.com
    SMTP_PORT=587

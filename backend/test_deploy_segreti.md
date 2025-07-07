@@ -3,6 +3,6 @@ Questo file è stato creato per testare il deploy automatico dopo la configurazi
 - postgres_url
 - database_url
 - supabase_url
-- supabase_key
+- supabase_service_role_key
 - jwt_secret
 Data: Sun Jun  8 10:33:55 EDT 2025

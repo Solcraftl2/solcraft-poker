@@ -6,5 +6,5 @@ Questo file è stato creato per testare la pipeline di deploy automatico con tut
 - DATABASE_URL
 - JWT_SECRET
 - SUPABASE_URL
-- SUPABASE_KEY
+- SUPABASE_SERVICE_ROLE_KEY
 Data: Sun Jun  8 09:45:24 EDT 2025
