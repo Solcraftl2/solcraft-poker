@@ -8,12 +8,13 @@ import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyC3VKZENjjD4CIGOIiTdFkZS76Rvx7jLeQ",
-  authDomain: "solcraft-92niu.firebaseapp.com",
-  projectId: "solcraft-92niu",
-  storageBucket: "solcraft-92niu.appspot.com",
-  messagingSenderId: "1090857900259",
-  appId: "1:1090857900259:web:b6da80415ba81d2e498dd6"
+  apiKey: "AIzaSyBSNDBnVWMNlXnyrtTUFdkO97zQZv1zEtE",
+  authDomain: "solcraft-poker-vercel.firebaseapp.com",
+  projectId: "solcraft-poker-vercel",
+  storageBucket: "solcraft-poker-vercel.firebasestorage.app",
+  messagingSenderId: "878156591343",
+  appId: "1:878156591343:web:17b3dc17435f94c42a6b1a",
+  measurementId: "G-TEQRBTTPGH"
 };
 
 
