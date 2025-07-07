@@ -16,6 +16,7 @@ SolCraft is a Next.js web application designed to provide a comprehensive platfo
   - [Installation](#installation)
   - [Running the Development Server](#running-the-development-server)
 - [Deployment to Vercel](#deployment-to-vercel)
+- [Deployment to Netlify](#deployment-to-netlify)
 - [Key Features](#key-features)
 - [Folder Structure](#folder-structure)
 - [Styling](#styling)
@@ -138,6 +139,22 @@ This project is optimized for deployment on Vercel.
     *   `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`: Your Measurement ID (optional).
 
 4.  **Deploy:** Trigger a deployment. Vercel will build and deploy your application.
+
+## Deployment to Netlify
+
+You can also deploy this project on Netlify. Ensure the `netlify.toml` file is present at the repository root and configure the following environment variables in your Netlify site settings:
+
+* `FIREBASE_PROJECT_ID`
+* `GOOGLE_APPLICATION_CREDENTIALS` – paste the entire JSON from your Firebase service account
+* `NEXT_PUBLIC_FIREBASE_API_KEY`
+* `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+* `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+* `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+* `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+* `NEXT_PUBLIC_FIREBASE_APP_ID`
+* `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` (optional)
+
+Deploying through Netlify will build the Next.js application and serve it using Netlify Functions.
 
 ## Key Features
 
