@@ -19,11 +19,34 @@ export default function LaunchTokenPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
-  // TODO: Implement actual filtering logic based on searchTerm, statusFilter, categoryFilter
-  const featuredLaunches = mockTokenLaunches.filter(launch => launch.isFeatured && (launch.stage === 'Live' || launch.stage === 'Upcoming')).slice(0, 2);
-  const liveLaunches = mockTokenLaunches.filter(launch => launch.stage === 'Live' && !launch.isFeatured);
-  const upcomingLaunches = mockTokenLaunches.filter(launch => launch.stage === 'Upcoming' && !launch.isFeatured);
-  const pastLaunches = mockTokenLaunches.filter(launch => launch.stage === 'Ended');
+  // Filter launches based on search input and dropdown selections
+  const filteredLaunches = mockTokenLaunches.filter((launch) => {
+    const matchesSearch =
+      searchTerm.trim() === '' ||
+      launch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      launch.ticker.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'all' || launch.stage === statusFilter;
+    const matchesCategory =
+      categoryFilter === 'all' || launch.category === categoryFilter;
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
+
+  const featuredLaunches = filteredLaunches
+    .filter(
+      (launch) =>
+        launch.isFeatured && (launch.stage === 'Live' || launch.stage === 'Upcoming')
+    )
+    .slice(0, 2);
+  const liveLaunches = filteredLaunches.filter(
+    (launch) => launch.stage === 'Live' && !launch.isFeatured
+  );
+  const upcomingLaunches = filteredLaunches.filter(
+    (launch) => launch.stage === 'Upcoming' && !launch.isFeatured
+  );
+  const pastLaunches = filteredLaunches.filter(
+    (launch) => launch.stage === 'Ended'
+  );
 
   const allCategories = Array.from(new Set(mockTokenLaunches.map(l => l.category).filter(Boolean))) as string[];
 
