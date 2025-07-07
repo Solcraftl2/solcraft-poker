@@ -1,7 +1,7 @@
 [build]
   base = "."
-  command = "npm run build"
-  publish = "sol-craft/.next"
+  command = "cd sol-craft && npm run build"
+  publish = "sol-craft/out"
 
 [build.environment]
   NODE_VERSION = "18"
