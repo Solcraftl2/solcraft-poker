@@ -34,6 +34,7 @@ export interface Tournament {
   platform?: string; // e.g., "PokerStars", "Online", "Live Event"
   averagePlayers?: number; // For AI input
   historicalData?: string; // For AI input, can be a longer text
+  raisedAmount?: number; // Amount raised for tokenized tournaments
   aiRiskAssessment?: TournamentRiskAssessmentOutput; // Store pre-computed or on-demand
   tokenizationDetails?: TournamentTokenizationDetails;
   prizeWon?: number;
