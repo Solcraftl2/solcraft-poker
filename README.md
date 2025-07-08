@@ -7,7 +7,7 @@ Questo repository contiene l'intera piattaforma SolCraft Poker, organizzata come
 ```
 solcraft-poker/
 ├── frontend/          # Applicazione Next.js (React + TypeScript)
-├── backend/           # API Python (FastAPI/Flask)
+├── backend/           # API Python (FastAPI)
 ├── README.md          # Questo file
 ├── package.json       # Configurazione workspace
 └── .gitignore         # File da ignorare
