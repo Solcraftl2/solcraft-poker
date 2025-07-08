@@ -63,9 +63,12 @@ cd backend && pip install -r requirements.txt && cd ..
 
 3. **Configurazione ambiente**
 ```bash
-# Copia e configura variabili d'ambiente
+# Copia i file di esempio con le variabili d'ambiente
 cp frontend/.env.example frontend/.env.local
 cp backend/.env.example backend/.env
+# I template `.env.example` elencano tutte le variabili richieste
+# (es. `NEXT_PUBLIC_FIREBASE_API_KEY`, `SUPABASE_URL`).
+# Apri i file copiati e inserisci i tuoi valori.
 ```
 
 4. **Avvia i servizi**
