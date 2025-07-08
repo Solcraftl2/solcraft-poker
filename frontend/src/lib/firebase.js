@@ -1,14 +1,18 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
+// Firebase configuration sourced from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyC3VKZENjjD4CIGOIiTdFkZS76Rvx7jLeQ",
-  authDomain: "solcraft-92niu.firebaseapp.com",
-  projectId: "solcraft-92niu",
- storageBucket: "solcraft-92niu.appspot.com",
-  messagingSenderId: "1090857900259",
-  appId: "1:1090857900259:web:b6da80415ba81d2e498dd6"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+// Robust initialization similar to firebase.ts
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
 export const auth = getAuth(app);
+export { app, firebaseConfig };
