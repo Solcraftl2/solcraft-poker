@@ -191,6 +191,9 @@ Firebase is used for backend services: Authentication, Firestore database, and S
 *   `npm run start`: Starts the Next.js production server.
 *   `npm run lint`: Lints the project.
 
+Builds will fail if there are TypeScript or ESLint errors. The Next.js
+configuration does not ignore these issues during `npm run build`.
+
 ## Contributing
 
 (Placeholder) Contributions are welcome!
