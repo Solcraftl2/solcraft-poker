@@ -97,6 +97,7 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 **Note:** Service account keys are highly sensitive and **must not be committed to version control.**
@@ -136,6 +137,7 @@ This project is optimized for deployment on Vercel.
     *   `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`: Your Messaging Sender ID.
     *   `NEXT_PUBLIC_FIREBASE_APP_ID`: Your App ID.
     *   `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`: Your Measurement ID (optional).
+    *   `NEXT_PUBLIC_API_URL`: Base URL for the backend API.
 
 4.  **Deploy:** Trigger a deployment. Vercel will build and deploy your application.
 
