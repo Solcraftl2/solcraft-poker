@@ -67,6 +67,11 @@ cd backend && pip install -r requirements.txt && cd ..
 cp frontend/.env.example frontend/.env.local
 cp backend/.env.example backend/.env
 ```
+I file di esempio includono tutte le chiavi richieste:
+`frontend/.env.example` contiene variabili come `NEXT_PUBLIC_FIREBASE_API_KEY`,
+mentre `backend/.env.example` definisce `SUPABASE_URL`,
+`SUPABASE_SERVICE_ROLE_KEY` e le altre impostazioni del backend. Dopo la copia
+modifica i nuovi file con i valori reali.
 
 4. **Avvia i servizi**
 ```bash
