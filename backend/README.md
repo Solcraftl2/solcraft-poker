@@ -2,13 +2,13 @@
 
 Backend per la piattaforma di tokenizzazione SolCraft L2 su blockchain Solana.
 
-## Configurazione Deploy con GitHub Actions
+## Configurazione Deploy su Vercel
 
-Questo repository è configurato per il deploy automatico su Vercel tramite GitHub Actions. Il workflow è definito nel file `.github/workflows/vercel-deploy.yml`.
+Il backend può essere pubblicato su Vercel utilizzando la CLI o configurando un workflow personalizzato nel tuo repository.
 
 ### Prerequisiti
 
-Per utilizzare il workflow di deploy automatico, è necessario configurare i seguenti segreti nel repository GitHub:
+Per il deploy è necessario configurare i seguenti segreti nel repository GitHub o nell'interfaccia di Vercel:
 
 - `VERCEL_TOKEN`: Token di accesso per l'API Vercel
 - `VERCEL_ORG_ID`: ID dell'organizzazione Vercel
@@ -27,7 +27,7 @@ Per utilizzare il workflow di deploy automatico, è necessario configurare i seg
 
 1. **VERCEL_TOKEN**:
    - Vai su https://vercel.com/account/tokens
-   - Crea un nuovo token con nome "GitHub Actions"
+   - Crea un nuovo token (ad esempio "deploy")
    - Copia il token generato
 
 2. **VERCEL_ORG_ID e VERCEL_PROJECT_ID**:
@@ -46,9 +46,7 @@ Per utilizzare il workflow di deploy automatico, è necessario configurare i seg
 
 ### Trigger del Deploy
 
-Il deploy viene avviato automaticamente in due casi:
-- Push sul branch `main`
-- Avvio manuale del workflow tramite l'interfaccia di GitHub Actions
+Il deploy può essere avviato automaticamente con un push sul branch `main` se Vercel è collegato al repository, oppure manualmente dalla dashboard di Vercel.
 
 ## Connessione al Database
 

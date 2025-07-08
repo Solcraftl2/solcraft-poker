@@ -63,9 +63,10 @@ cd backend && pip install -r requirements.txt && cd ..
 
 3. **Configurazione ambiente**
 ```bash
-# Copia e configura variabili d'ambiente
-cp frontend/.env.example frontend/.env.local
-cp backend/.env.example backend/.env
+# Crea i file per le variabili d'ambiente (nel repository non sono presenti `.env.example`)
+touch frontend/.env.local
+touch backend/.env
+# Popola i file con le configurazioni necessarie
 ```
 
 4. **Avvia i servizi**
