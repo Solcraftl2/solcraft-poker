@@ -12,6 +12,7 @@ solcraft-poker/
 ├── package.json       # Configurazione workspace
 └── .gitignore         # File da ignorare
 ```
+**Nota:** la cartella `frontend_backup` (vecchia app basata su Supabase) è stata rimossa.
 
 ## Componenti
 
