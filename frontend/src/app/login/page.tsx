@@ -8,9 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState, type FormEvent } from 'react';
-import { LogIn, ShieldCheck } from 'lucide-react';
+import { LogIn, ShieldCheck, Wallet as WalletIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, type User, setPersistence, browserSessionPersistence, browserLocalPersistence } from 'firebase/auth';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletAuth } from '@/hooks/useWalletAuth';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -39,6 +41,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { connect, connected } = useWallet();
+  const { login: walletLogin, loading: walletLoading } = useWalletAuth();
 
   const createInitialUserProfile = async (firebaseUser: User) => {
     if (!firebaseUser.email) return;
@@ -117,6 +121,20 @@ export default function LoginPage() {
     }
   };
 
+  const handleWalletLogin = async () => {
+    try {
+      if (!connected) {
+        await connect();
+      }
+      await walletLogin();
+      toast({ title: 'Login Successful!', description: 'Wallet authenticated.' });
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error('Wallet login error:', error);
+      toast({ title: 'Login Failed', description: error.message || 'Wallet authentication failed', variant: 'destructive' });
+    }
+  };
+
   return (
     <>
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
@@ -170,12 +188,15 @@ export default function LoginPage() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <Button variant="outline" className="h-11 text-base" onClick={() => handleSocialLogin('google')} disabled={isLoading}>
                   <GoogleIcon className="mr-2 h-5 w-5" /> Google
               </Button>
               <Button variant="outline" className="h-11 text-base" onClick={() => handleSocialLogin('github')} disabled={isLoading}>
                   <GithubIcon className="mr-2 h-5 w-5" /> GitHub
+              </Button>
+              <Button variant="outline" className="h-11 text-base" onClick={handleWalletLogin} disabled={walletLoading}>
+                  <WalletIcon className="mr-2 h-5 w-5" /> Wallet
               </Button>
             </div>
 
