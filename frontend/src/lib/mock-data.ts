@@ -655,9 +655,13 @@ export const mockTokenLaunches: TokenLaunch[] = [
     isFeatured: true,
     tags: ["Streaming", "Web3", "Creator Economy"],
     vestingSchedule: "5% TGE, 3 month cliff, 24 months linear",
-    totalSupply: 5000000000,
+  totalSupply: 5000000000,
   },
 ];
+
+export async function getLaunch(id: string): Promise<TokenLaunch | undefined> {
+  return mockTokenLaunches.find((launch) => launch.id === id);
+}
 
 export const mockStakingSummary: StakingSummary = {
   totalStakedUSD: 12500.75,

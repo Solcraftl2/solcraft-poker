@@ -1,5 +1,4 @@
 
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect, type FormEvent, type ChangeEvent, useRef } from "react";
@@ -26,15 +25,15 @@ import { Badge } from "@/components/ui/badge";
 export default function ProfilePage() {
   const [authUser, setAuthUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [isConnectWalletOpen, setIsConnectWalletOpen] = useState(false);
-  
-  const [editableName, setEditableName] = useState("");
-  const [editableBio, setEditableBio] = useState("");
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSavingProfile, setIsSavingProfile] = useState<boolean>(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState<boolean>(false);
+  const [isConnectWalletOpen, setIsConnectWalletOpen] = useState<boolean>(false);
+
+  const [editableName, setEditableName] = useState<string>("");
+  const [editableBio, setEditableBio] = useState<string>("");
+  const [isEditingName, setIsEditingName] = useState<boolean>(false);
+  const [isEditingBio, setIsEditingBio] = useState<boolean>(false);
   const [currentTierDetails, setCurrentTierDetails] = useState<InvestmentTier | null>(null);
 
 
@@ -103,7 +102,7 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [router, toast]);
 
-  const handleConnectWallet = async (selectedWalletName: string) => {
+  const handleConnectWallet = async (selectedWalletName: string): Promise<void> => {
     if (!authUser || !userProfile) return;
     const newWalletAddress = `0xConnected...${selectedWalletName.substring(0,3)}`; 
     
@@ -127,7 +126,7 @@ export default function ProfilePage() {
     setIsConnectWalletOpen(false);
   };
 
-  const handleDisconnectWallet = async () => {
+  const handleDisconnectWallet = async (): Promise<void> => {
     if (!authUser || !userProfile) return;
     const updatedProfile = {
       ...userProfile,
@@ -144,7 +143,7 @@ export default function ProfilePage() {
     }
   }
 
-  const handleCopyAddress = () => {
+  const handleCopyAddress = (): void => {
     if (userProfile?.walletAddress) {
       navigator.clipboard.writeText(userProfile.walletAddress)
         .then(() => {
@@ -156,7 +155,7 @@ export default function ProfilePage() {
     }
   };
   
-  const handleSaveName = async () => {
+  const handleSaveName = async (): Promise<void> => {
     if (!authUser || !userProfile) return;
 
     const trimmedName = editableName.trim();
@@ -191,7 +190,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSaveBio = async () => {
+  const handleSaveBio = async (): Promise<void> => {
     if (!authUser || !userProfile) return;
 
     if (editableBio.length > 500) {
@@ -217,7 +216,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFileChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
     if (!event.target.files || event.target.files.length === 0) {
       return;
     }
