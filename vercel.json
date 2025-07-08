@@ -1,0 +1,13 @@
+{
+  "buildCommand": "cd sol-craft && npm run build",
+  "outputDirectory": "sol-craft/.next",
+  "installCommand": "cd sol-craft && npm install",
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/sol-craft/$1"
+    }
+  ]
+}
+
