@@ -27,7 +27,8 @@ solcraft-poker/
 
 ### Backend (`/backend`)
 - **Framework**: Python con FastAPI
-- **Database**: PostgreSQL/MongoDB
+ - **Database**: Supabase (PostgreSQL)
+ - **Database Authoritative**: Tutti i dati principali risiedono su Supabase; Firestore viene utilizzato solo per funzionalità client-side.
 - **Funzionalità**:
   - API REST per frontend
   - Gestione utenti e autenticazione

@@ -45,7 +45,7 @@ SolCraft aims to be a user-friendly yet powerful platform for both new and exper
 *   **UI Components:** ShadCN UI
 *   **Styling:** Tailwind CSS
 *   **AI Integration:** Genkit (for Google AI models like Gemini)
-*   **Backend/Database:** Firebase (Authentication, Firestore, Storage)
+*   **Backend API & Database:** Supabase (PostgreSQL) tramite FastAPI. Firebase gestisce Autenticazione e Storage.
 *   **State Management:** React Context API, `useState`, `useEffect`
 *   **Forms:** React Hook Form with Zod for validation
 *   **Charting:** Recharts (via ShadCN Charts)
@@ -182,7 +182,7 @@ Genkit is used for integrating AI capabilities, such as the tournament risk asse
 
 ## Firebase Integration
 
-Firebase is used for backend services: Authentication, Firestore database, and Storage for file uploads.
+Firebase provides Authentication and Storage. Tutti i dati persistenti sono gestiti tramite Supabase attraverso le API del backend.
 
 ## Available Scripts
 

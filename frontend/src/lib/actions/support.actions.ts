@@ -1,10 +1,9 @@
 
 'use server';
-import { getAdminDb } from '@/lib/firebaseAdmin';
 import type { SupportTicket } from '../types';
+import { apiCall, API_ENDPOINTS } from '@/lib/api-config';
 
 export async function submitSupportTicket(formData: {name: string, email: string, subject: string, message: string}, userId?: string) {
-    const adminDb = getAdminDb();
     const ticketData: SupportTicket = {
         name: formData.name,
         email: formData.email,
@@ -19,10 +18,13 @@ export async function submitSupportTicket(formData: {name: string, email: string
     }
 
     try {
-        await adminDb.collection('supportTickets').add(ticketData);
+        await apiCall(`${API_ENDPOINTS.guarantees}/support`, {
+            method: 'POST',
+            body: JSON.stringify(ticketData),
+        });
         return { success: true, message: 'Support ticket submitted successfully!' };
     } catch (error) {
-        console.error('Error submitting support ticket:', error);
+        console.error('Error submitting support ticket via API:', error);
         return { success: false, message: 'Failed to submit your support ticket. Please try again later.' };
     }
 }
