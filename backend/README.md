@@ -13,10 +13,8 @@ Per utilizzare il workflow di deploy automatico, è necessario configurare i seg
 - `VERCEL_TOKEN`: Token di accesso per l'API Vercel
 - `VERCEL_ORG_ID`: ID dell'organizzazione Vercel
 - `VERCEL_PROJECT_ID`: ID del progetto Vercel (prj_2Dh9UFSJ6Ul2DGxyJydFwQGAhLsu)
-- `POSTGRES_URL`: URL di connessione al database PostgreSQL su Supabase
-- `DATABASE_URL`: URL di connessione al database (stesso valore di POSTGRES_URL)
-- `SUPABASE_URL`: URL del progetto Supabase
-- `SUPABASE_KEY`: Chiave API di Supabase
+ - `POSTGRES_URL`: URL di connessione al database PostgreSQL
+ - `DATABASE_URL`: URL di connessione al database (stesso valore di POSTGRES_URL)
 - `JWT_SECRET`: Chiave segreta per la generazione dei token JWT
 - `SMTP_HOST`: Host del server SMTP per l'invio di email
 - `SMTP_PORT`: Porta del server SMTP
@@ -36,14 +34,6 @@ Per utilizzare il workflow di deploy automatico, è necessario configurare i seg
    - Esegui `vercel link` nella directory del progetto
    - I valori di ORG_ID e PROJECT_ID saranno salvati nel file `.vercel/project.json`
 
-### Come ottenere i segreti Supabase
-
-1. **SUPABASE_URL e SUPABASE_KEY**:
-   - Vai su https://app.supabase.io/
-   - Seleziona il tuo progetto
-   - Vai su Settings > API
-   - Copia "URL" e "anon/public key"
-
 ### Trigger del Deploy
 
 Il deploy viene avviato automaticamente in due casi:
@@ -52,7 +42,7 @@ Il deploy viene avviato automaticamente in due casi:
 
 ## Connessione al Database
 
-Il backend utilizza PostgreSQL su Supabase come database. La connessione è configurata tramite le variabili d'ambiente `POSTGRES_URL` e `DATABASE_URL`.
+Il backend utilizza PostgreSQL come database. La connessione è configurata tramite le variabili d'ambiente `POSTGRES_URL` e `DATABASE_URL`.
 
 ## Struttura del Progetto
 
@@ -69,8 +59,6 @@ Il backend utilizza PostgreSQL su Supabase come database. La connessione è conf
    ```
    DATABASE_URL=postgresql://postgres:postgres@db.solcraftl2.supabase.co:5432/postgres
    POSTGRES_URL=postgresql://postgres:postgres@db.solcraftl2.supabase.co:5432/postgres
-   SUPABASE_URL=https://db.solcraftl2.supabase.co
-   SUPABASE_KEY=your-supabase-key
    JWT_SECRET=your-jwt-secret
    SMTP_HOST=smtp.example.com
    SMTP_PORT=587
