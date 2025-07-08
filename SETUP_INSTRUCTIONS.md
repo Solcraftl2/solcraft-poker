@@ -100,7 +100,6 @@ npm run dev:backend   # http://localhost:8000
 
 ### Frontend (Vercel)
 - Il frontend è già configurato per Vercel
-- File `vercel.json` presente in `/frontend`
 - Collega il repository GitHub a Vercel
 
 ### Backend (Railway/Heroku)

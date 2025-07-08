@@ -2,6 +2,9 @@
 
 Backend per la piattaforma di tokenizzazione SolCraft L2 su blockchain Solana.
 
+Questo backend utilizza **FastAPI** e ha come unico entry point il file
+`main.py`.
+
 ## Configurazione Deploy con GitHub Actions
 
 Questo repository è configurato per il deploy automatico su Vercel tramite GitHub Actions. Il workflow è definito nel file `.github/workflows/vercel-deploy.yml`.
@@ -56,7 +59,7 @@ Il backend utilizza PostgreSQL su Supabase come database. La connessione è conf
 
 ## Struttura del Progetto
 
-- `/api`: Endpoint API Flask
+- `/api`: Router FastAPI
 - `/models`: Modelli di dati
 - `/services`: Logica di business
 - `/utils`: Utility e helper functions
