@@ -14,6 +14,16 @@ export const API_ENDPOINTS = {
   // Players
   players: `${API_BASE_URL}/api/players`,
   playerProfile: (id: string) => `${API_BASE_URL}/api/players/${id}`,
+
+  feesInitial: `${API_BASE_URL}/api/fees/initial`,
+  feesWinnings: `${API_BASE_URL}/api/fees/winnings`,
+  feeStats: `${API_BASE_URL}/api/fees/stats`,
+
+  guaranteePay: `${API_BASE_URL}/api/guarantees/pay`,
+  guaranteeReturn: `${API_BASE_URL}/api/guarantees/return`,
+  guaranteeForfeit: `${API_BASE_URL}/api/guarantees/forfeit`,
+  guaranteesByPlayer: (id: string) => `${API_BASE_URL}/api/guarantees/player/${id}`,
+  guaranteeByTournament: (id: string) => `${API_BASE_URL}/api/guarantees/tournament/${id}`,
   
   // Fees
   fees: `${API_BASE_URL}/api/fees`,
@@ -78,12 +88,42 @@ export const api = {
   // Players
   getPlayers: () => apiCall<any[]>(API_ENDPOINTS.players),
   getPlayerProfile: (id: string) => apiCall<any>(API_ENDPOINTS.playerProfile(id)),
-  
+  createPlayerProfile: (data: any) => apiCall<any>(API_ENDPOINTS.players, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  updatePlayerProfile: (data: any) => apiCall<any>(`${API_ENDPOINTS.players}/me`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+
   // Fees
   getFees: () => apiCall<any[]>(API_ENDPOINTS.fees),
-  
+  payInitialFee: (data: any) => apiCall<any>(API_ENDPOINTS.feesInitial, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  payWinningsFee: (data: any) => apiCall<any>(API_ENDPOINTS.feesWinnings, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  getFeeStats: () => apiCall<any>(API_ENDPOINTS.feeStats),
+
   // Guarantees
-  getGuarantees: () => apiCall<any[]>(API_ENDPOINTS.guarantees),
+  getGuarantees: (playerId: string) => apiCall<any[]>(API_ENDPOINTS.guaranteesByPlayer(playerId)),
+  getTournamentGuarantee: (tournamentId: string) => apiCall<any>(API_ENDPOINTS.guaranteeByTournament(tournamentId)),
+  payGuarantee: (data: any) => apiCall<any>(API_ENDPOINTS.guaranteePay, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  returnGuarantee: (data: any) => apiCall<any>(API_ENDPOINTS.guaranteeReturn, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  forfeitGuarantee: (data: any) => apiCall<any>(API_ENDPOINTS.guaranteeForfeit, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
 };
 
 export default api;
