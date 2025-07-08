@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Copy, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { auth, db } from "@/lib/firebase";
-import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { api } from "@/lib/api-config";
 import type { UserProfile } from "@/lib/types";
 
 interface MyBalanceCardProps {
@@ -30,23 +30,20 @@ export function MyBalanceCard({ className }: MyBalanceCardProps) {
       if (currentUser) {
         // setAuthUser(currentUser); // Not strictly needed if only using uid from currentUser
         try {
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            const profileData = userDocSnap.data() as UserProfile;
+          const profileData = await api.getPlayerProfile(currentUser.uid) as UserProfile;
+          if (profileData) {
             setDisplayBalance({
               amount: profileData.balance?.amount ?? 0,
               currency: profileData.balance?.currency ?? 'USD',
-              walletAddress: profileData.walletAddress ?? 'Not Connected' // More descriptive default
+              walletAddress: profileData.walletAddress ?? 'Not Connected'
             });
           } else {
-            // This case should ideally not happen if profile is created on signup
             toast({ title: "Profile not found", description: "Could not load balance details. Please complete your profile.", variant: "destructive" });
-             setDisplayBalance({ amount: 0, currency: 'USD', walletAddress: 'Not found' });
+            setDisplayBalance({ amount: 0, currency: 'USD', walletAddress: 'Not found' });
           }
         } catch (error) {
-          console.error("Error fetching user balance:", error);
-          toast({ title: "Error", description: "Could not load balance.", variant: "destructive" });
+          console.error('Error fetching user balance:', error);
+          toast({ title: 'Error', description: 'Could not load balance.', variant: 'destructive' });
           setDisplayBalance({ amount: 0, currency: 'USD', walletAddress: 'Error loading' });
         }
       } else {

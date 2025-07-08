@@ -22,9 +22,9 @@ import {
 } from "@/lib/mock-data";
 import { TournamentCard } from "@/components/tournaments/tournament-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { api } from '@/lib/api-config';
 import type { UserProfile, Investment, KeyMetric, Tournament } from '@/lib/types';
 import { Loader2, Activity, Award, TrendingUp, Crown, Landmark } from 'lucide-react';
 
@@ -41,10 +41,8 @@ export default function DashboardPage() {
       if (currentUser) {
         setAuthUser(currentUser);
         try {
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            const profileData = userDocSnap.data() as UserProfile;
+          const profileData = await api.getPlayerProfile(currentUser.uid) as UserProfile;
+          if (profileData) {
             setUserProfile(profileData);
 
             const activeInvestmentsCount = mockInvestments.filter(

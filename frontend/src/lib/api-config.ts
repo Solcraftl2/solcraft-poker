@@ -14,12 +14,20 @@ export const API_ENDPOINTS = {
   // Players
   players: `${API_BASE_URL}/api/players`,
   playerProfile: (id: string) => `${API_BASE_URL}/api/players/${id}`,
+  updatePlayerProfile: (id: string) => `${API_BASE_URL}/api/players/${id}`,
+  playerFollow: (id: string) => `${API_BASE_URL}/api/players/${id}/follow`,
   
   // Fees
   fees: `${API_BASE_URL}/api/fees`,
   
   // Guarantees
   guarantees: `${API_BASE_URL}/api/guarantees`,
+
+  // Investments
+  investments: `${API_BASE_URL}/api/investments`,
+
+  // Support
+  supportTickets: `${API_BASE_URL}/api/support`,
 } as const;
 
 // API Client configuration
@@ -78,6 +86,26 @@ export const api = {
   // Players
   getPlayers: () => apiCall<any[]>(API_ENDPOINTS.players),
   getPlayerProfile: (id: string) => apiCall<any>(API_ENDPOINTS.playerProfile(id)),
+  updatePlayerProfile: (id: string, data: any) =>
+    apiCall<any>(API_ENDPOINTS.updatePlayerProfile(id), {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  toggleFollow: (id: string) =>
+    apiCall<any>(API_ENDPOINTS.playerFollow(id), { method: 'POST' }),
+
+  // Investments
+  createInvestment: (data: any) =>
+    apiCall<any>(API_ENDPOINTS.investments, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  submitSupportTicket: (data: any) =>
+    apiCall<any>(API_ENDPOINTS.supportTickets, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   
   // Fees
   getFees: () => apiCall<any[]>(API_ENDPOINTS.fees),
