@@ -65,7 +65,7 @@ Il backend utilizza PostgreSQL su Supabase come database. La connessione è conf
 
 1. Clona il repository
 2. Installa le dipendenze: `npm install`
-3. Crea un file `.env` con le variabili d'ambiente necessarie:
+3. Copia `backend/.env.example` in `.env` e personalizza le variabili d'ambiente:
    ```
    DATABASE_URL=postgresql://postgres:postgres@db.solcraftl2.supabase.co:5432/postgres
    POSTGRES_URL=postgresql://postgres:postgres@db.solcraftl2.supabase.co:5432/postgres
