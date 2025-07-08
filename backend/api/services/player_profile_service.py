@@ -6,11 +6,14 @@ from uuid import UUID
 import logging
 from datetime import datetime
 
+from ..config.database import get_db_connection
+
 logger = logging.getLogger(__name__)
 
 class PlayerProfileService:
-    def __init__(self, supabase):
-        self.supabase = supabase
+    def __init__(self, supabase=None):
+        """Service constructor. If no connection is provided a new one is created."""
+        self.supabase = supabase or get_db_connection()
 
     async def get_player_by_user_id(self, user_id: str):
         """Get a player profile by user ID."""

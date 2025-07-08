@@ -4,32 +4,30 @@ Corrected authentication utilities for SolCraft L2 backend.
 from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional, Dict, Any
+import os
 import jwt
 import logging
-from ..config.database import get_supabase_client
+from ..config.database import get_db_connection
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
 class AuthService:
     def __init__(self):
-        self.supabase = get_supabase_client()
+        # Initialize a standard database connection
+        self.db = get_db_connection()
     
     def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Verify JWT token and return user data."""
         try:
-            # For Supabase, we can verify the token using the Supabase client
-            # This is a simplified version - in production you'd want more robust verification
-            response = self.supabase.auth.get_user(token)
-            
-            if response.user:
-                return {
-                    "id": response.user.id,
-                    "email": response.user.email,
-                    "user_metadata": response.user.user_metadata
-                }
-            
-            return None
+            # Decode JWT token using shared secret
+            secret = os.getenv("JWT_SECRET", "your-secret-key")
+            payload = jwt.decode(token, secret, algorithms=["HS256"])
+            return {
+                "id": payload.get("sub"),
+                "email": payload.get("email"),
+                "user_metadata": payload.get("user_metadata")
+            }
         except Exception as e:
             logger.error(f"Token verification failed: {str(e)}")
             return None
@@ -37,17 +35,22 @@ class AuthService:
     def get_user_from_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Get user information from token."""
         try:
-            # Verify token and get user
+            # Verify token and get user payload
             user_data = self.verify_token(token)
             if not user_data:
                 return None
-            
-            # Get additional user profile data from database
-            response = self.supabase.table("user_profiles").select("*").eq("user_id", user_data["id"]).single().execute()
-            
-            if response.data:
-                user_data.update(response.data)
-            
+
+            # Fetch additional user profile data from database
+            with self.db.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM user_profiles WHERE user_id = %s LIMIT 1",
+                    (user_data["id"],),
+                )
+                profile = cur.fetchone()
+
+            if profile:
+                user_data.update(profile)
+
             return user_data
         except Exception as e:
             logger.error(f"Error getting user from token: {str(e)}")
