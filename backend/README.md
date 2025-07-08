@@ -2,6 +2,9 @@
 
 Backend per la piattaforma di tokenizzazione SolCraft L2 su blockchain Solana.
 
+## Database Authoritativo
+Supabase (PostgreSQL) è la fonte di verità per tutti i dati persistenti. Il frontend utilizza Firebase unicamente per l'autenticazione e lo storage dei file.
+
 ## Configurazione Deploy con GitHub Actions
 
 Questo repository è configurato per il deploy automatico su Vercel tramite GitHub Actions. Il workflow è definito nel file `.github/workflows/vercel-deploy.yml`.

@@ -1,71 +1,39 @@
 
 'use server';
 
-import { getAdminDb } from '@/lib/firebaseAdmin';
 import type { SocialPlayer } from '../types';
-import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
+import { api, apiCall, API_ENDPOINTS } from '@/lib/api-config';
 
 export async function getPlayers(): Promise<SocialPlayer[]> {
-  const adminDb = getAdminDb();
   try {
-    const usersSnapshot = await adminDb.collection('users')
-      .orderBy('ranking')
-      .limit(50)
-      .get();
-      
-    if (usersSnapshot.empty) {
-      return [];
-    }
-
-    const players = usersSnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        ...data,
-        id: doc.id,
-        uid: doc.id,
-        // isFollowed is a client-side concern, determined by the logged-in user
-      } as SocialPlayer;
-    });
-    
-    return players;
+    const players = await api.getPlayers();
+    return players as SocialPlayer[];
   } catch (error) {
-    console.error("Error fetching players from Firestore:", error);
+    console.error('Error fetching players from API:', error);
     return [];
   }
 }
 
 export async function toggleFollow(currentUserId: string, targetUserId: string, isCurrentlyFollowing: boolean) {
-    const adminDb = getAdminDb();
     if (!currentUserId || !targetUserId || currentUserId === targetUserId) {
         return { success: false, message: 'Invalid request.' };
     }
-    
-    const currentUserRef = adminDb.collection('users').doc(currentUserId);
-    const targetUserRef = adminDb.collection('users').doc(targetUserId);
 
-    const batch = adminDb.batch();
-
-    if (isCurrentlyFollowing) {
-        // Unfollow action
-        batch.update(currentUserRef, { followingCount: FieldValue.increment(-1) });
-        batch.update(targetUserRef, { followersCount: FieldValue.increment(-1) });
-    } else {
-        // Follow action
-        batch.update(currentUserRef, { followingCount: FieldValue.increment(1) });
-        batch.update(targetUserRef, { followersCount: FieldValue.increment(1) });
-    }
+    const method = isCurrentlyFollowing ? 'DELETE' : 'POST';
 
     try {
-        await batch.commit();
-        // Revalidate paths to reflect updated data for both users
+        await apiCall(`${API_ENDPOINTS.playerProfile(targetUserId)}/follow`, {
+            method,
+            body: JSON.stringify({ userId: currentUserId }),
+        });
         revalidatePath('/social');
-        revalidatePath(`/profile/${targetUserId}`); // Assuming profile page uses ID
-        revalidatePath('/profile'); // Revalidate current user's profile page
-        
+        revalidatePath(`/profile/${targetUserId}`);
+        revalidatePath('/profile');
+
         return { success: true, message: isCurrentlyFollowing ? 'Unfollowed successfully' : 'Followed successfully' };
     } catch (error) {
-        console.error('Error toggling follow:', error);
+        console.error('Error toggling follow via API:', error);
         return { success: false, message: 'Could not complete the action. Please try again.' };
     }
 }
