@@ -99,8 +99,8 @@ npm run dev:backend   # http://localhost:8000
 ## 🔧 Configurazione Deployment
 
 ### Frontend (Vercel)
-- Il frontend è già configurato per Vercel
-- File `vercel.json` presente in `/frontend`
+- Il frontend è già predisposto per il deploy su Vercel
+- Crea un file `vercel.json` in `/frontend` se desideri personalizzare la configurazione
 - Collega il repository GitHub a Vercel
 
 ### Backend (Railway/Heroku)
