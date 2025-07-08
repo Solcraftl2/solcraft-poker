@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { KeyMetricsCard } from "@/components/dashboard/figma/key-metrics-card";
-import { MyBalanceCard } from "@/components/dashboard/figma/my-balance-card";
+import { BalanceDisplay } from "@/components/dashboard/BalanceDisplay";
 import { RecentActivityTable } from "@/components/dashboard/figma/recent-activity-table";
 import { FigmaPortfolioPerformanceChart } from "@/components/dashboard/figma/figma-portfolio-performance-chart";
 import { PortfolioAllocationCard } from "@/components/dashboard/figma/portfolio-allocation-card";
@@ -114,7 +114,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <PortfolioAllocationCard data={mockPortfolioAllocation} />
         <KeyMetricsCard metrics={dynamicKeyMetrics} />
-        <MyBalanceCard />
+        <BalanceDisplay userId={authUser?.uid} />
       </div>
 
       <TopCryptocurrencyTable cryptocurrencies={mockTopCryptocurrencies} />
