@@ -7,13 +7,13 @@ import jwt
 import hashlib
 import smtplib
 import psycopg2
-from psycopg2.extras import RealDictCursor, DictCursor, register_uuid
+from psycopg2.extras import RealDictCursor, register_uuid
 import uuid
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import supabase
 import traceback
 import logging
+from api.config import get_db_connection
 
 # Configurazione logging avanzato
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -38,25 +38,14 @@ SMTP_PASS = os.environ.get('SMTP_PASS', '')
 DATABASE_URL = os.environ.get('DATABASE_URL')
 POSTGRES_URL = os.environ.get('POSTGRES_URL')
 POSTGRES_URL_NON_POOLING = os.environ.get('POSTGRES_URL_NON_POOLING')
-supabase_url = os.environ.get('SUPABASE_URL')
-supabase_key = os.environ.get('SUPABASE_KEY')
 
 # Logging delle variabili d'ambiente (oscurate per sicurezza)
 logger.info(f"DATABASE_URL configurato: {DATABASE_URL[:20] + '...' if DATABASE_URL else 'Non configurato'}")
 logger.info(f"POSTGRES_URL configurato: {POSTGRES_URL[:20] + '...' if POSTGRES_URL else 'Non configurato'}")
-logger.info(f"POSTGRES_URL_NON_POOLING configurato: {POSTGRES_URL_NON_POOLING[:20] + '...' if POSTGRES_URL_NON_POOLING else 'Non configurato'}")
-logger.info(f"SUPABASE_URL configurato: {supabase_url if supabase_url else 'Non configurato'}")
-logger.info(f"SUPABASE_KEY configurato: {'Configurato' if supabase_key else 'Non configurato'}")
+logger.info(
+    f"POSTGRES_URL_NON_POOLING configurato: {POSTGRES_URL_NON_POOLING[:20] + '...' if POSTGRES_URL_NON_POOLING else 'Non configurato'}"
+)
 
-# Initialize Supabase client
-supabase_client = None
-if supabase_url and supabase_key:
-    try:
-        supabase_client = supabase.create_client(supabase_url, supabase_key)
-        logger.info(f"Supabase client inizializzato con successo con URL: {supabase_url}")
-    except Exception as e:
-        logger.error(f"Errore inizializzazione Supabase client: {str(e)}")
-        logger.error(traceback.format_exc())
 
 # Helper function to convert UUID to string if needed
 def safe_uuid(value):
@@ -89,83 +78,6 @@ def ensure_valid_uuid(value):
         logger.error(f"UUID non valido: {value} (tipo: {type(value)})")
         raise ValueError(f"Invalid UUID format: {value}")
 
-# Database connection function with improved SSL handling, connection format, and direct connection
-def get_db_connection():
-    # Logging dettagliato di ogni tentativo di connessione
-    logger.info("Tentativo di connessione al database PostgreSQL...")
-    
-    try:
-        # Priorità alle stringhe di connessione
-        connection_string = None
-        connection_type = None
-        
-        # 1. Prima prova con POSTGRES_URL_NON_POOLING (connessione diretta)
-        if POSTGRES_URL_NON_POOLING:
-            connection_string = POSTGRES_URL_NON_POOLING
-            connection_type = "POSTGRES_URL_NON_POOLING (connessione diretta)"
-        # 2. Poi prova con POSTGRES_URL (pooler)
-        elif POSTGRES_URL:
-            connection_string = POSTGRES_URL
-            connection_type = "POSTGRES_URL (pooler)"
-        # 3. Infine prova con DATABASE_URL
-        elif DATABASE_URL:
-            connection_string = DATABASE_URL
-            connection_type = "DATABASE_URL"
-        
-        if not connection_string:
-            logger.error("Nessuna stringa di connessione disponibile")
-            return None
-        
-        # Modifica il prefisso da postgresql:// a postgres:// se necessario
-        if connection_string.startswith('postgresql://'):
-            connection_string = 'postgres://' + connection_string[14:]
-            logger.info("Prefisso della stringa di connessione modificato da postgresql:// a postgres://")
-        
-        # Disabilita SSL per test
-        if '?' not in connection_string:
-            connection_string += "?sslmode=disable"
-            logger.info("SSL disabilitato (sslmode=disable) per test")
-        elif 'sslmode=' not in connection_string:
-            connection_string += "&sslmode=disable"
-            logger.info("SSL disabilitato (sslmode=disable) per test")
-        else:
-            # Sostituisci qualsiasi modalità SSL esistente con 'disable'
-            import re
-            connection_string = re.sub(r'sslmode=\w+', 'sslmode=disable', connection_string)
-            logger.info("Modalità SSL esistente sostituita con 'disable' per test")
-            
-        logger.info(f"Tentativo di connessione con: {connection_type} - {connection_string[:20]}... (SSL disabilitato)")
-        
-        # Parametri di connessione espliciti con timeout aumentato
-        conn = psycopg2.connect(
-            connection_string,
-            connect_timeout=60,  # Aumentato a 60 secondi
-            application_name="solcraft-backend"  # Nome dell'applicazione per il monitoraggio
-        )
-        conn.autocommit = True
-        logger.info(f"Connessione al database riuscita con {connection_type}")
-        return conn
-    except Exception as e:
-        logger.error(f"Errore connessione al database con {connection_type if 'connection_type' in locals() else 'stringa sconosciuta'}: {str(e)}")
-        logger.error(traceback.format_exc())
-        
-        # Prova con connessione diretta hardcoded come ultima risorsa
-        try:
-            logger.info("Tentativo di connessione diretta hardcoded come ultima risorsa...")
-            direct_conn_string = "postgres://postgres:kCxBrdFOGbqEgtfs@db.zlainxopxrjgfphwjdvk.supabase.co:5432/postgres?sslmode=disable"
-            logger.info(f"Tentativo connessione diretta hardcoded: {direct_conn_string[:20]}...")
-            conn = psycopg2.connect(
-                direct_conn_string,
-                connect_timeout=60,
-                application_name="solcraft-backend-direct"
-            )
-            conn.autocommit = True
-            logger.info("Connessione diretta hardcoded riuscita")
-            return conn
-        except Exception as direct_err:
-            logger.error(f"Errore connessione diretta hardcoded: {str(direct_err)}")
-            logger.error(traceback.format_exc())
-        return None
 
 # Sample data for testing
 sample_tournaments = [
@@ -374,10 +286,7 @@ def debug_env():
             "DATABASE_URL": DATABASE_URL[:20] + "..." if DATABASE_URL else None,
             "POSTGRES_URL": POSTGRES_URL[:20] + "..." if POSTGRES_URL else None,
             "POSTGRES_URL_NON_POOLING": POSTGRES_URL_NON_POOLING[:20] + "..." if POSTGRES_URL_NON_POOLING else None,
-            "SUPABASE_URL": supabase_url,
-            "SUPABASE_KEY": supabase_key[:10] + "..." if supabase_key else None,
             "JWT_SECRET": JWT_SECRET[:5] + "..." if JWT_SECRET else None,
-            "SUPABASE_CLIENT_INITIALIZED": supabase_client is not None
         }
         
         # Tenta una connessione di test al database
@@ -447,39 +356,7 @@ def debug_connection():
         # Test di connessione con diverse configurazioni
         results = []
         
-        # Test 1: Connessione diretta hardcoded con SSL disabilitato
-        try:
-            start_time = datetime.now()
-            direct_conn_string = "postgres://postgres:kCxBrdFOGbqEgtfs@db.zlainxopxrjgfphwjdvk.supabase.co:5432/postgres?sslmode=disable"
-            conn = psycopg2.connect(direct_conn_string, connect_timeout=30)
-            conn.autocommit = True
-            
-            # Verifica che la connessione funzioni
-            cur = conn.cursor()
-            cur.execute("SELECT current_database(), current_user, version()")
-            db_info = cur.fetchone()
-            cur.close()
-            conn.close()
-            
-            end_time = datetime.now()
-            duration = (end_time - start_time).total_seconds()
-            
-            results.append({
-                "type": "direct_hardcoded_ssl_disable",
-                "success": True,
-                "database": db_info[0],
-                "user": db_info[1],
-                "version": db_info[2],
-                "duration_seconds": duration
-            })
-        except Exception as e:
-            results.append({
-                "type": "direct_hardcoded_ssl_disable",
-                "success": False,
-                "error": str(e)
-            })
-        
-        # Test 2: Connessione con POSTGRES_URL_NON_POOLING
+        # Test 1: Connessione con POSTGRES_URL_NON_POOLING
         if POSTGRES_URL_NON_POOLING:
             try:
                 start_time = datetime.now()
