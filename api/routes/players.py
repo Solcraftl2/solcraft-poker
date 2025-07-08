@@ -6,12 +6,12 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import List, Optional
 from datetime import datetime
 
-from models.player import (
+from ..models.player import (
     Player, PlayerCreate, PlayerUpdate, PlayerResponse, 
     PlayerListResponse, PlayerStats, PlayerTier
 )
-from services.firebase_service import FirebaseService
-from services.auth_service import get_current_user
+from ..services.firebase_service import FirebaseService
+from ..services.auth_service import get_current_user
 
 router = APIRouter()
 firebase_service = FirebaseService()

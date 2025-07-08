@@ -10,11 +10,11 @@ import os
 from typing import Dict, Any
 
 # Import route modules
-from routes.tournaments import router as tournaments_router
-from routes.players import router as players_router
-from routes.fees import router as fees_router
-from routes.guarantees import router as guarantees_router
-from routes.auth import router as auth_router
+from .routes.tournaments import router as tournaments_router
+from .routes.players import router as players_router
+from .routes.fees import router as fees_router
+from .routes.guarantees import router as guarantees_router
+from .routes.auth import router as auth_router
 
 # Initialize FastAPI app
 app = FastAPI(

@@ -18,6 +18,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { WalletButton } from "@/components/shared/wallet-button";
 import Image from "next/image";
 import type { NavItem } from "@/lib/types";
 import { 
@@ -114,7 +115,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center space-x-2">
+            <WalletButton variant="outline" size="default" />
             <Button variant="ghost" className="w-full justify-start" onClick={handleLogout} disabled={isLoggingOut}>
               {isLoggingOut ? (
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -163,7 +165,8 @@ export function SiteHeader() {
                             ))}
                         </nav>
                     </div>
-                    <div className="mt-auto p-4 border-t">
+                    <div className="mt-auto p-4 border-t space-y-2">
+                        <WalletButton variant="outline" size="default" className="w-full" />
                         <Button variant="ghost" className="w-full justify-start" onClick={handleLogout} disabled={isLoggingOut}>
                             <LogOut className="mr-2 h-4 w-4" /> Logout
                         </Button>

@@ -12,6 +12,7 @@ import { InvestmentHistoryCard } from "@/components/dashboard/investment-history
 import { Edit3, Mail, CalendarDays, DollarSign, TrendingUp, Wallet, CheckCircle, Copy, Loader2, Save, Upload, X, Crown, Activity as TierActivity, Info } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ConnectWalletDialog } from "@/components/shared/connect-wallet-dialog";
+import { useWallet } from "@/contexts/WalletContext";
 import type { UserProfile, InvestmentTier } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { auth, db, storage } from "@/lib/firebase"; // Import storage
@@ -37,6 +38,14 @@ export default function ProfilePage() {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [currentTierDetails, setCurrentTierDetails] = useState<InvestmentTier | null>(null);
 
+  // Hook per il wallet Web3
+  const { 
+    connected: walletConnected, 
+    walletAddress: walletContextAddress, 
+    walletName: walletContextName,
+    balance: walletBalance,
+    disconnect: walletDisconnect 
+  } = useWallet();
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -104,54 +113,56 @@ export default function ProfilePage() {
   }, [router, toast]);
 
   const handleConnectWallet = async (selectedWalletName: string) => {
-    if (!authUser || !userProfile) return;
-    const newWalletAddress = `0xConnected...${selectedWalletName.substring(0,3)}`; 
-    
-    const updatedProfile = {
-      ...userProfile,
-      isWalletConnected: true,
-      walletAddress: newWalletAddress
-    };
-    setUserProfile(updatedProfile);
-
-    try {
-      await setDoc(doc(db, "users", authUser.uid), { walletAddress: newWalletAddress, isWalletConnected: true }, { merge: true });
-      toast({
-          title: "Wallet Connected",
-          description: `${selectedWalletName} has been successfully connected and saved.`,
-      });
-    } catch (error) {
-        console.error("Error saving wallet address to Firestore:", error);
-        toast({ title: "Connection Saved Locally", description: "Could not save wallet connection to cloud.", variant: "destructive"});
-    }
-    setIsConnectWalletOpen(false);
+    // Questa funzione ora è gestita direttamente dal ConnectWalletDialog
+    // Manteniamo per compatibilità ma non fa nulla
+    console.log('handleConnectWallet chiamato con:', selectedWalletName);
   };
 
   const handleDisconnectWallet = async () => {
     if (!authUser || !userProfile) return;
-    const updatedProfile = {
-      ...userProfile,
-      isWalletConnected: false,
-      walletAddress: mockUserProfile.walletAddress 
-    };
-    setUserProfile(updatedProfile);
+    
     try {
-        await setDoc(doc(db, "users", authUser.uid), { walletAddress: mockUserProfile.walletAddress, isWalletConnected: false }, { merge: true });
-        toast({ title: "Wallet Disconnected", description: "Wallet has been disconnected and saved.", variant: "default"});
+      // Disconnetti dal WalletContext
+      await walletDisconnect();
+      
+      // Aggiorna il profilo utente
+      const updatedProfile = {
+        ...userProfile,
+        isWalletConnected: false,
+        walletAddress: mockUserProfile.walletAddress 
+      };
+      setUserProfile(updatedProfile);
+      
+      // Salva su Firebase
+      await setDoc(doc(db, "users", authUser.uid), { 
+        walletAddress: mockUserProfile.walletAddress, 
+        isWalletConnected: false 
+      }, { merge: true });
+      
+      toast({ 
+        title: "Wallet Disconnesso", 
+        description: "Il wallet è stato disconnesso con successo.", 
+        variant: "default"
+      });
     } catch (error) {
-        console.error("Error saving wallet disconnection to Firestore:", error);
-        toast({ title: "Disconnected Locally", description: "Could not save wallet disconnection to cloud.", variant: "destructive"});
+      console.error("Errore disconnessione wallet:", error);
+      toast({ 
+        title: "Errore Disconnessione", 
+        description: "Impossibile disconnettere il wallet.", 
+        variant: "destructive"
+      });
     }
-  }
+  };
 
   const handleCopyAddress = () => {
-    if (userProfile?.walletAddress) {
-      navigator.clipboard.writeText(userProfile.walletAddress)
+    const addressToCopy = walletContextAddress || userProfile?.walletAddress;
+    if (addressToCopy) {
+      navigator.clipboard.writeText(addressToCopy)
         .then(() => {
-          toast({ title: "Wallet Address Copied!", description: userProfile.walletAddress });
+          toast({ title: "Indirizzo Copiato!", description: addressToCopy });
         })
         .catch(err => {
-          toast({ title: "Failed to copy", description: "Could not copy address to clipboard.", variant: "destructive" });
+          toast({ title: "Errore Copia", description: "Impossibile copiare l'indirizzo.", variant: "destructive" });
         });
     }
   };
@@ -380,30 +391,40 @@ export default function ProfilePage() {
                 <span>Joined: {profileJoinedDate}</span>
               </div>
 
-              {userProfile.isWalletConnected && userProfile.walletAddress ? (
+              {walletConnected && walletContextAddress ? (
                 <div className="pt-2">
                     <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-md text-center">
                         <div className="flex items-center justify-center mb-1">
                             <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
-                            <span className="font-semibold text-green-500">Wallet Connected</span>
+                            <span className="font-semibold text-green-500">Wallet Connesso</span>
                         </div>
-                        <div className="flex items-center justify-center text-xs text-muted-foreground">
-                            <span>{userProfile.walletAddress.length > 20 ? `${userProfile.walletAddress.substring(0,10)}...${userProfile.walletAddress.slice(-10)}` : userProfile.walletAddress}</span>
+                        <div className="flex items-center justify-center text-xs text-muted-foreground mb-1">
+                            <span>{walletContextAddress.length > 20 ? `${walletContextAddress.substring(0,10)}...${walletContextAddress.slice(-10)}` : walletContextAddress}</span>
                             <Button variant="ghost" size="icon" className="ml-1 h-6 w-6" onClick={handleCopyAddress}>
                                 <Copy className="h-3 w-3" />
                             </Button>
                         </div>
+                        {walletContextName && (
+                          <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                            {walletContextName}
+                          </div>
+                        )}
+                        {walletBalance !== null && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Balance: {walletBalance.toFixed(4)} SOL
+                          </div>
+                        )}
                     </div>
                     <Button className="w-full mt-2" variant="outline" onClick={handleDisconnectWallet}>
-                        Disconnect Wallet
+                        Disconnetti Wallet
                     </Button>
                 </div>
               ) : (
                 <>
                     <Button className="w-full mt-4" variant="default" onClick={() => setIsConnectWalletOpen(true)}>
-                        <Wallet className="mr-2 h-4 w-4" /> Connect Wallet
+                        <Wallet className="mr-2 h-4 w-4" /> Connetti Wallet
                     </Button>
-                    <p className="text-xs text-muted-foreground text-center mt-2">Wallet not connected. Connect to manage funds and sign transactions.</p>
+                    <p className="text-xs text-muted-foreground text-center mt-2">Wallet non connesso. Connetti per gestire fondi e firmare transazioni.</p>
                 </>
               )}
             </CardContent>
