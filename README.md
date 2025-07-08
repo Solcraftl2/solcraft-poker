@@ -25,14 +25,20 @@ solcraft-poker/
   - Integrazione wallet Solana
   - Sistema di autenticazione
 
-### Backend (`/backend`)
+-### Backend (`/backend`)
 - **Framework**: Python con FastAPI
-- **Database**: PostgreSQL/MongoDB
+- **Database**: PostgreSQL su Supabase (database autorevole della piattaforma)
 - **Funzionalità**:
   - API REST per frontend
   - Gestione utenti e autenticazione
   - Logica business tornei
   - Integrazione blockchain
+
+### Database Autorevole
+
+L'intera applicazione utilizza Supabase come sorgente principale dei dati. Tutti gli
+endpoint REST esposti dal backend accedono a Supabase e il frontend comunica con il
+backend per leggere e scrivere dati.
 
 ## Quick Start
 
