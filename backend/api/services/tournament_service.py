@@ -5,14 +5,15 @@ from typing import List, Optional, Dict, Any
 from uuid import UUID
 import logging
 from datetime import datetime
-from ..config.database import get_supabase_client
+from ..config.database import get_db_connection
 from ..models.tournament_models import RANKING_CONFIG
 
 logger = logging.getLogger(__name__)
 
 class TournamentService:
     def __init__(self):
-        self.supabase = get_supabase_client()
+        # Use a generic PostgreSQL connection
+        self.supabase = get_db_connection()
 
     def create_tournament(
         self,

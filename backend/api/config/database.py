@@ -1,44 +1,44 @@
 # api/config/database.py
-"""
-Database configuration for SolCraft L2 backend.
-"""
+"""Database configuration for SolCraft L2 backend using PostgreSQL."""
 import os
-from supabase import create_client, Client
-from typing import Optional
 import logging
+from typing import Optional
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 logger = logging.getLogger(__name__)
 
 class DatabaseConfig:
+    """Simple PostgreSQL connection manager."""
+
     def __init__(self):
-        self.supabase_url = os.getenv("SUPABASE_URL")
-        self.supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-        self._client: Optional[Client] = None
-        
-        if not self.supabase_url:
-            raise ValueError("SUPABASE_URL environment variable is required")
-        
-        if not self.supabase_key:
-            raise ValueError("SUPABASE_SERVICE_ROLE_KEY environment variable is required")
+        # Connection URL can be provided via DATABASE_URL or POSTGRES_URL
+        self.database_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+        self._connection: Optional[psycopg2.extensions.connection] = None
+
+        if not self.database_url:
+            raise ValueError("DATABASE_URL or POSTGRES_URL environment variable is required")
     
     @property
-    def client(self) -> Client:
-        """Get Supabase client instance."""
-        if self._client is None:
+    def connection(self) -> psycopg2.extensions.connection:
+        """Return a PostgreSQL connection, creating it if necessary."""
+        if self._connection is None or self._connection.closed:
             try:
-                self._client = create_client(self.supabase_url, self.supabase_key)
-                logger.info("Supabase client initialized successfully")
+                self._connection = psycopg2.connect(self.database_url, cursor_factory=RealDictCursor)
+                logger.info("PostgreSQL connection established")
             except Exception as e:
-                logger.error(f"Failed to initialize Supabase client: {str(e)}")
+                logger.error(f"Failed to connect to PostgreSQL: {str(e)}")
                 raise
-        
-        return self._client
+
+        return self._connection
     
     def test_connection(self) -> bool:
-        """Test database connection."""
+        """Test database connection by performing a simple query."""
         try:
-            # Test connection with a simple query
-            response = self.client.table("tournaments").select("id").limit(1).execute()
+            with self.connection.cursor() as cur:
+                cur.execute("SELECT 1;")
+                cur.fetchone()
             return True
         except Exception as e:
             logger.error(f"Database connection test failed: {str(e)}")
@@ -47,7 +47,7 @@ class DatabaseConfig:
 # Global database instance
 db_config = DatabaseConfig()
 
-def get_supabase_client() -> Client:
-    """Get the Supabase client instance."""
-    return db_config.client
+def get_db_connection() -> psycopg2.extensions.connection:
+    """Get a PostgreSQL connection instance."""
+    return db_config.connection
 
