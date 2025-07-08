@@ -80,6 +80,14 @@ npm run dev:backend
 npm run dev
 ```
 
+### Test
+
+Per eseguire la suite di test backend con **pytest**:
+
+```bash
+npm run test:backend
+```
+
 ## Scripts Disponibili
 
 - `npm run dev` - Avvia frontend e backend in parallelo
@@ -87,6 +95,8 @@ npm run dev
 - `npm run dev:backend` - Avvia solo il backend
 - `npm run build` - Build di produzione per entrambi
 - `npm run test` - Esegue tutti i test
+- `npm run test:backend` - Esegue i test del backend (pytest)
+- `npm run test:frontend` - Esegue i test del frontend
 - `npm run lint` - Linting del codice
 
 ## Deployment
