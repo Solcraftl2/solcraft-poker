@@ -6,14 +6,21 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional, Dict, Any
 import jwt
 import logging
-from ..config.database import get_supabase_client
+import os
+from supabase import create_client, Client
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
 class AuthService:
     def __init__(self):
-        self.supabase = get_supabase_client()
+        """Initialise Supabase client using environment variables."""
+        supabase_url = os.getenv("SUPABASE_URL")
+        supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+        if not supabase_url or not supabase_key:
+            raise ValueError("Supabase credentials are not configured")
+
+        self.supabase: Client = create_client(supabase_url, supabase_key)
     
     def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Verify JWT token and return user data."""
