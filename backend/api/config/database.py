@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 class DatabaseConfig:
     def __init__(self):
         self.supabase_url = os.getenv("SUPABASE_URL")
-        self.supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        self.supabase_key = os.getenv("SUPABASE_KEY")
         self._client: Optional[Client] = None
         
         if not self.supabase_url:
             raise ValueError("SUPABASE_URL environment variable is required")
         
         if not self.supabase_key:
-            raise ValueError("SUPABASE_SERVICE_ROLE_KEY environment variable is required")
+            raise ValueError("SUPABASE_KEY environment variable is required")
     
     @property
     def client(self) -> Client:
