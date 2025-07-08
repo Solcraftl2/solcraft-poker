@@ -6,48 +6,55 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional, Dict, Any
 import jwt
 import logging
-from ..config.database import get_supabase_client
+import os
+from ..config.database import db_config
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
 class AuthService:
     def __init__(self):
-        self.supabase = get_supabase_client()
+        self.supabase = db_config.client
+        self.jwt_secret = os.getenv("JWT_SECRET", "your-secret-key")
+        self.algorithm = "HS256"
     
     def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
-        """Verify JWT token and return user data."""
+        """Verify JWT token and return the payload."""
         try:
-            # For Supabase, we can verify the token using the Supabase client
-            # This is a simplified version - in production you'd want more robust verification
-            response = self.supabase.auth.get_user(token)
-            
-            if response.user:
-                return {
-                    "id": response.user.id,
-                    "email": response.user.email,
-                    "user_metadata": response.user.user_metadata
-                }
-            
+            payload = jwt.decode(token, self.jwt_secret, algorithms=[self.algorithm])
+            return payload
+        except jwt.ExpiredSignatureError:
+            logger.warning("Token expired")
             return None
-        except Exception as e:
+        except jwt.PyJWTError as e:
             logger.error(f"Token verification failed: {str(e)}")
             return None
     
     def get_user_from_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Get user information from token."""
         try:
-            # Verify token and get user
-            user_data = self.verify_token(token)
-            if not user_data:
+            payload = self.verify_token(token)
+            if not payload:
                 return None
-            
+
+            user_id = payload.get("sub")
+            if not user_id:
+                return None
+
+            user_data = {"id": user_id}
+
             # Get additional user profile data from database
-            response = self.supabase.table("user_profiles").select("*").eq("user_id", user_data["id"]).single().execute()
-            
+            response = (
+                self.supabase.table("user_profiles")
+                .select("*")
+                .eq("user_id", user_id)
+                .single()
+                .execute()
+            )
+
             if response.data:
                 user_data.update(response.data)
-            
+
             return user_data
         except Exception as e:
             logger.error(f"Error getting user from token: {str(e)}")
