@@ -1,9 +1,11 @@
 "use client";
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from "next/image";
 import { PageHeader } from "@/components/shared/page-header";
 import { TournamentCard } from "@/components/tournaments/tournament-card";
 import { mockTournaments } from "@/lib/mock-data";
+import { api } from "@/lib/api-config";
+import type { Tournament } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -13,9 +15,26 @@ export default function TournamentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [buyInRange, setBuyInRange] = useState('any');
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+
+  useEffect(() => {
+    const useMock = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
+    if (useMock) {
+      setTournaments(mockTournaments);
+      return;
+    }
+    api.getTournaments()
+      .then((data) => {
+        setTournaments(data as Tournament[]);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch tournaments:', err);
+        setTournaments(mockTournaments);
+      });
+  }, []);
 
   const filteredTournaments = useMemo(() => {
-    return mockTournaments.filter(tournament => {
+    return tournaments.filter(tournament => {
       const searchMatch = searchTerm === '' || tournament.name.toLowerCase().includes(searchTerm.toLowerCase());
       const statusMatch = statusFilter === 'all' || tournament.status.toLowerCase() === statusFilter.toLowerCase();
       const buyInMatch = (() => {
