@@ -66,6 +66,10 @@ cd backend && pip install -r requirements.txt && cd ..
 # Copia e configura variabili d'ambiente
 cp frontend/.env.example frontend/.env.local
 cp backend/.env.example backend/.env
+# Imposta l'URL dell'API backend e abilita eventuale fallback ai dati mock
+# in frontend/.env.local
+# NEXT_PUBLIC_API_URL=http://localhost:8000
+# NEXT_PUBLIC_USE_MOCK_DATA=true
 ```
 
 4. **Avvia i servizi**
