@@ -13,6 +13,10 @@ solcraft-poker/
 └── .gitignore         # File da ignorare
 ```
 
+> **Nota**: Il precedente percorso `frontend_backup/` conteneva una versione di
+> test del frontend ed è stato rimosso. L'implementazione attiva risiede in
+> `frontend/`.
+
 ## Componenti
 
 ### Frontend (`/frontend`)
