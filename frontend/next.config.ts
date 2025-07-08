@@ -3,10 +3,10 @@ import type {NextConfig} from 'next';
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
-    ignoreBuildErrors: true, // Changed to false for production
+    ignoreBuildErrors: false, // Builds now fail on type errors
   },
   eslint: {
-    ignoreDuringBuilds: true, // Changed to false for production
+    ignoreDuringBuilds: false, // Builds now fail on lint errors
   },
   images: {
     remotePatterns: [
