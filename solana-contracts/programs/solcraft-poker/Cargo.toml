@@ -1,0 +1,26 @@
+[package]
+name = "solcraft-poker"
+version = "0.1.0"
+description = "SolCraft Poker - Main game contract"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "solcraft_poker"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }
+solana-program = { workspace = true }
+spl-token = { workspace = true }
+spl-associated-token-account = { workspace = true }
+mpl-token-metadata = { workspace = true }
+switchboard-v2 = { workspace = true }
+
