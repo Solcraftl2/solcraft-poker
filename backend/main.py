@@ -13,6 +13,9 @@ load_dotenv()
 
 # Importa i router
 from api.routers.tournaments import router as tournaments_router
+from api.routers.users import router as users_router
+from api.routers.debug import router as debug_router
+from api.routers.info import router as info_router
 from api.config.database import db_config
 
 # Configurazione logging
@@ -42,6 +45,9 @@ app.add_middleware(
 
 # Registra i router
 app.include_router(tournaments_router, prefix="/api")
+app.include_router(users_router, prefix="/api")
+app.include_router(debug_router, prefix="/api")
+app.include_router(info_router)
 
 @app.get("/")
 async def root():
