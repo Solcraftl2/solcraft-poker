@@ -11,9 +11,9 @@ from psycopg2.extras import RealDictCursor, DictCursor, register_uuid
 import uuid
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import supabase
 import traceback
 import logging
+from api.config import get_supabase_client, db_config
 
 # Configurazione logging avanzato
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -38,25 +38,13 @@ SMTP_PASS = os.environ.get('SMTP_PASS', '')
 DATABASE_URL = os.environ.get('DATABASE_URL')
 POSTGRES_URL = os.environ.get('POSTGRES_URL')
 POSTGRES_URL_NON_POOLING = os.environ.get('POSTGRES_URL_NON_POOLING')
-supabase_url = os.environ.get('SUPABASE_URL')
-supabase_key = os.environ.get('SUPABASE_KEY')
 
 # Logging delle variabili d'ambiente (oscurate per sicurezza)
 logger.info(f"DATABASE_URL configurato: {DATABASE_URL[:20] + '...' if DATABASE_URL else 'Non configurato'}")
 logger.info(f"POSTGRES_URL configurato: {POSTGRES_URL[:20] + '...' if POSTGRES_URL else 'Non configurato'}")
-logger.info(f"POSTGRES_URL_NON_POOLING configurato: {POSTGRES_URL_NON_POOLING[:20] + '...' if POSTGRES_URL_NON_POOLING else 'Non configurato'}")
-logger.info(f"SUPABASE_URL configurato: {supabase_url if supabase_url else 'Non configurato'}")
-logger.info(f"SUPABASE_KEY configurato: {'Configurato' if supabase_key else 'Non configurato'}")
-
-# Initialize Supabase client
-supabase_client = None
-if supabase_url and supabase_key:
-    try:
-        supabase_client = supabase.create_client(supabase_url, supabase_key)
-        logger.info(f"Supabase client inizializzato con successo con URL: {supabase_url}")
-    except Exception as e:
-        logger.error(f"Errore inizializzazione Supabase client: {str(e)}")
-        logger.error(traceback.format_exc())
+logger.info(
+    f"POSTGRES_URL_NON_POOLING configurato: {POSTGRES_URL_NON_POOLING[:20] + '...' if POSTGRES_URL_NON_POOLING else 'Non configurato'}"
+)
 
 # Helper function to convert UUID to string if needed
 def safe_uuid(value):
@@ -149,22 +137,6 @@ def get_db_connection():
         logger.error(f"Errore connessione al database con {connection_type if 'connection_type' in locals() else 'stringa sconosciuta'}: {str(e)}")
         logger.error(traceback.format_exc())
         
-        # Prova con connessione diretta hardcoded come ultima risorsa
-        try:
-            logger.info("Tentativo di connessione diretta hardcoded come ultima risorsa...")
-            direct_conn_string = "postgres://postgres:kCxBrdFOGbqEgtfs@db.zlainxopxrjgfphwjdvk.supabase.co:5432/postgres?sslmode=disable"
-            logger.info(f"Tentativo connessione diretta hardcoded: {direct_conn_string[:20]}...")
-            conn = psycopg2.connect(
-                direct_conn_string,
-                connect_timeout=60,
-                application_name="solcraft-backend-direct"
-            )
-            conn.autocommit = True
-            logger.info("Connessione diretta hardcoded riuscita")
-            return conn
-        except Exception as direct_err:
-            logger.error(f"Errore connessione diretta hardcoded: {str(direct_err)}")
-            logger.error(traceback.format_exc())
         return None
 
 # Sample data for testing
@@ -374,43 +346,15 @@ def debug_env():
             "DATABASE_URL": DATABASE_URL[:20] + "..." if DATABASE_URL else None,
             "POSTGRES_URL": POSTGRES_URL[:20] + "..." if POSTGRES_URL else None,
             "POSTGRES_URL_NON_POOLING": POSTGRES_URL_NON_POOLING[:20] + "..." if POSTGRES_URL_NON_POOLING else None,
-            "SUPABASE_URL": supabase_url,
-            "SUPABASE_KEY": supabase_key[:10] + "..." if supabase_key else None,
-            "JWT_SECRET": JWT_SECRET[:5] + "..." if JWT_SECRET else None,
-            "SUPABASE_CLIENT_INITIALIZED": supabase_client is not None
+            "JWT_SECRET": JWT_SECRET[:5] + "..." if JWT_SECRET else None
         }
         
-        # Tenta una connessione di test al database
-        conn = get_db_connection()
-        db_connection_success = conn is not None
-        db_connection_message = "Database connection successful"
+        # Test Supabase connection using the helper
+        db_connection_success = db_config.test_connection()
+        db_connection_message = (
+            "Database connection successful" if db_connection_success else "Database connection failed"
+        )
         db_connection_details = {}
-        
-        if conn:
-            try:
-                # Verifica che la connessione funzioni eseguendo una query semplice
-                cur = conn.cursor()
-                cur.execute("SELECT 1")
-                cur.close()
-                
-                # Raccogli informazioni sulla connessione
-                cur = conn.cursor()
-                cur.execute("SELECT current_database(), current_user, version()")
-                db_info = cur.fetchone()
-                db_connection_details = {
-                    "database": db_info[0],
-                    "user": db_info[1],
-                    "version": db_info[2]
-                }
-                cur.close()
-            except Exception as e:
-                db_connection_message = f"Database connection established but query failed: {str(e)}"
-                logger.error(f"Errore query di test: {str(e)}")
-                logger.error(traceback.format_exc())
-            finally:
-                conn.close()
-        else:
-            db_connection_message = "Database connection failed"
         
         # Raccogli informazioni sul server
         server_info = {
@@ -447,37 +391,7 @@ def debug_connection():
         # Test di connessione con diverse configurazioni
         results = []
         
-        # Test 1: Connessione diretta hardcoded con SSL disabilitato
-        try:
-            start_time = datetime.now()
-            direct_conn_string = "postgres://postgres:kCxBrdFOGbqEgtfs@db.zlainxopxrjgfphwjdvk.supabase.co:5432/postgres?sslmode=disable"
-            conn = psycopg2.connect(direct_conn_string, connect_timeout=30)
-            conn.autocommit = True
-            
-            # Verifica che la connessione funzioni
-            cur = conn.cursor()
-            cur.execute("SELECT current_database(), current_user, version()")
-            db_info = cur.fetchone()
-            cur.close()
-            conn.close()
-            
-            end_time = datetime.now()
-            duration = (end_time - start_time).total_seconds()
-            
-            results.append({
-                "type": "direct_hardcoded_ssl_disable",
-                "success": True,
-                "database": db_info[0],
-                "user": db_info[1],
-                "version": db_info[2],
-                "duration_seconds": duration
-            })
-        except Exception as e:
-            results.append({
-                "type": "direct_hardcoded_ssl_disable",
-                "success": False,
-                "error": str(e)
-            })
+
         
         # Test 2: Connessione con POSTGRES_URL_NON_POOLING
         if POSTGRES_URL_NON_POOLING:
@@ -668,46 +582,21 @@ def debug_connection():
 @app.route('/api/tournaments', methods=['GET'])
 def get_tournaments():
     try:
-        conn = get_db_connection()
-        if conn:
-            try:
-                cur = conn.cursor(cursor_factory=RealDictCursor)
-                cur.execute("SELECT * FROM tournaments")
-                tournaments = cur.fetchall()
-                cur.close()
-                conn.close()
-                
-                # Converti i dati per la risposta JSON
-                tournaments_list = []
-                for tournament in tournaments:
-                    # Converti UUID a stringa per JSON
-                    tournament_dict = dict(tournament)
-                    for key, value in tournament_dict.items():
-                        if isinstance(value, uuid.UUID):
-                            tournament_dict[key] = str(value)
-                    tournaments_list.append(tournament_dict)
-                
-                return jsonify({
-                    "status": "success",
-                    "data": tournaments_list
-                })
-            except Exception as e:
-                logger.error(f"Errore query tournaments: {str(e)}")
-                logger.error(traceback.format_exc())
-                conn.close()
-                # Fallback ai dati di esempio
-                return jsonify({
-                    "status": "success",
-                    "data": sample_tournaments,
-                    "note": "Using sample data due to database connection issue"
-                })
-        else:
-            # Fallback ai dati di esempio
-            return jsonify({
-                "status": "success",
-                "data": sample_tournaments,
-                "note": "Using sample data due to database connection issue"
-            })
+        supabase = get_supabase_client()
+        try:
+            response = supabase.table("tournaments").select("*").execute()
+            if response.error:
+                raise Exception(response.error)
+            tournaments_list = response.data
+        except Exception as e:
+            logger.error(f"Errore query tournaments: {str(e)}")
+            logger.error(traceback.format_exc())
+            tournaments_list = sample_tournaments
+
+        return jsonify({
+            "status": "success",
+            "data": tournaments_list
+        })
     except Exception as e:
         logger.error(f"Errore endpoint tournaments: {str(e)}")
         logger.error(traceback.format_exc())
@@ -719,81 +608,35 @@ def get_tournaments():
 @app.route('/api/tournaments/<tournament_id>', methods=['GET'])
 def get_tournament(tournament_id):
     try:
-        conn = get_db_connection()
-        if conn:
-            try:
-                cur = conn.cursor(cursor_factory=RealDictCursor)
-                
-                # Verifica se l'ID è un UUID valido
-                try:
-                    # Tenta di convertire l'ID in UUID per validazione
-                    tournament_uuid = str(uuid.UUID(tournament_id))
-                    # Se la conversione ha successo, usa l'UUID nella query
-                    cur.execute("SELECT * FROM tournaments WHERE id::text = %s", (tournament_uuid,))
-                except ValueError:
-                    # Se non è un UUID valido, prova come stringa
-                    cur.execute("SELECT * FROM tournaments WHERE id::text = %s", (tournament_id,))
-                
-                tournament = cur.fetchone()
-                cur.close()
-                conn.close()
-                
-                if tournament:
-                    # Converti UUID a stringa per JSON
-                    tournament_dict = dict(tournament)
-                    for key, value in tournament_dict.items():
-                        if isinstance(value, uuid.UUID):
-                            tournament_dict[key] = str(value)
-                    
-                    return jsonify({
-                        "status": "success",
-                        "data": tournament_dict
-                    })
-                else:
-                    # Fallback ai dati di esempio se il torneo non è trovato
-                    for tournament in sample_tournaments:
-                        if str(tournament["id"]) == str(tournament_id):
-                            return jsonify({
-                                "status": "success",
-                                "data": tournament,
-                                "note": "Using sample data due to database connection issue"
-                            })
-                    
-                    return jsonify({
-                        "status": "error",
-                        "message": "Tournament not found"
-                    }), 404
-            except Exception as e:
-                logger.error(f"Errore query tournament: {str(e)}")
-                logger.error(traceback.format_exc())
-                conn.close()
-                # Fallback ai dati di esempio
-                for tournament in sample_tournaments:
-                    if str(tournament["id"]) == str(tournament_id):
-                        return jsonify({
-                            "status": "success",
-                            "data": tournament,
-                            "note": "Using sample data due to database connection issue"
-                        })
-                
-                return jsonify({
-                    "status": "error",
-                    "message": str(e)
-                }), 500
-        else:
+        supabase = get_supabase_client()
+        try:
+            response = (
+                supabase.table("tournaments")
+                .select("*")
+                .eq("id", tournament_id)
+                .single()
+                .execute()
+            )
+            if response.error:
+                raise Exception(response.error)
+            tournament = response.data
+        except Exception as e:
+            logger.error(f"Errore query tournament: {str(e)}")
+            logger.error(traceback.format_exc())
             # Fallback ai dati di esempio
-            for tournament in sample_tournaments:
-                if str(tournament["id"]) == str(tournament_id):
+            for t in sample_tournaments:
+                if str(t["id"]) == str(tournament_id):
                     return jsonify({
                         "status": "success",
-                        "data": tournament,
+                        "data": t,
                         "note": "Using sample data due to database connection issue"
                     })
-            
-            return jsonify({
-                "status": "error",
-                "message": "Tournament not found"
-            }), 404
+            return jsonify({"status": "error", "message": "Tournament not found"}), 404
+
+        if tournament:
+            return jsonify({"status": "success", "data": tournament})
+        else:
+            return jsonify({"status": "error", "message": "Tournament not found"}), 404
     except Exception as e:
         logger.error(f"Errore endpoint tournament: {str(e)}")
         logger.error(traceback.format_exc())
@@ -816,90 +659,55 @@ def create_tournament():
                     "message": f"Missing required field: {field}"
                 }), 400
         
-        conn = get_db_connection()
-        if conn:
+        supabase = get_supabase_client()
+
+        # Genera un nuovo UUID per il torneo
+        tournament_id = str(uuid.uuid4())
+        logger.info(f"Nuovo UUID torneo generato: {tournament_id}")
+
+        # Converti organizer_id in stringa se presente
+        organizer_id = None
+        if data.get('organizer_id'):
             try:
-                cur = conn.cursor(cursor_factory=RealDictCursor)
-                
-                # Genera un nuovo UUID per il torneo
-                tournament_id = str(uuid.uuid4())
-                logger.info(f"Nuovo UUID torneo generato: {tournament_id}")
-                
-                # Adatta i nomi delle colonne alla struttura reale del database
-                # Converti organizer_id in stringa se presente
-                organizer_id = None
-                if data.get('organizer_id'):
-                    try:
-                        organizer_id = str(uuid.UUID(data.get('organizer_id')))
-                        logger.info(f"UUID organizer_id validato: {organizer_id}")
-                    except ValueError:
-                        logger.error(f"UUID organizer_id non valido: {data.get('organizer_id')}")
-                        return jsonify({
-                            "status": "error",
-                            "message": "Invalid organizer_id format"
-                        }), 400
-                
-                # Gestione del campo end_date obbligatorio
-                end_date = data.get('end_date')
-                if not end_date:
-                    # Se non fornito, imposta end_date a start_date + 3 ore
-                    try:
-                        start_date = datetime.fromisoformat(data['start_date'].replace('Z', '+00:00'))
-                        end_date = (start_date + timedelta(hours=3)).isoformat()
-                        logger.info(f"End date generata automaticamente: {end_date}")
-                    except (ValueError, TypeError):
-                        logger.error(f"Formato data non valido: {data['start_date']}")
-                        return jsonify({
-                            "status": "error",
-                            "message": "Invalid start_date format"
-                        }), 400
-                
-                # Log dei parametri prima dell'esecuzione della query
-                logger.info(f"Parametri query INSERT tournaments: id={tournament_id}, name={data['name']}, organizer_id={organizer_id}, end_date={end_date}")
-                
-                cur.execute("""
-                    INSERT INTO tournaments (id, name, buy_in, total_prize, start_date, end_date, status, organizer_id)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    RETURNING *
-                """, (
-                    tournament_id,
-                    data['name'],
-                    data['buy_in'],
-                    data['total_prize'],
-                    data['start_date'],
-                    end_date,
-                    data.get('status', 'upcoming'),
-                    organizer_id
-                ))
-                
-                tournament = cur.fetchone()
-                cur.close()
-                conn.close()
-                
-                # Converti UUID a stringa per JSON
-                tournament_dict = dict(tournament)
-                for key, value in tournament_dict.items():
-                    if isinstance(value, uuid.UUID):
-                        tournament_dict[key] = str(value)
-                
-                return jsonify({
-                    "status": "success",
-                    "message": "Tournament created successfully",
-                    "data": tournament_dict
-                }), 201
-            except Exception as e:
-                logger.error(f"Errore creazione tournament: {str(e)}")
-                logger.error(traceback.format_exc())
-                conn.close()
-                return jsonify({
-                    "status": "error",
-                    "message": str(e)
-                }), 500
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Database connection error"
-            }), 500
+                organizer_id = str(uuid.UUID(data.get('organizer_id')))
+                logger.info(f"UUID organizer_id validato: {organizer_id}")
+            except ValueError:
+                logger.error(f"UUID organizer_id non valido: {data.get('organizer_id')}")
+                return jsonify({"status": "error", "message": "Invalid organizer_id format"}), 400
+
+        # Gestione del campo end_date obbligatorio
+        end_date = data.get('end_date')
+        if not end_date:
+            try:
+                start_date = datetime.fromisoformat(data['start_date'].replace('Z', '+00:00'))
+                end_date = (start_date + timedelta(hours=3)).isoformat()
+                logger.info(f"End date generata automaticamente: {end_date}")
+            except (ValueError, TypeError):
+                logger.error(f"Formato data non valido: {data['start_date']}")
+                return jsonify({"status": "error", "message": "Invalid start_date format"}), 400
+
+        tournament_data = {
+            "id": tournament_id,
+            "name": data['name'],
+            "buy_in": data['buy_in'],
+            "total_prize": data['total_prize'],
+            "start_date": data['start_date'],
+            "end_date": end_date,
+            "status": data.get('status', 'upcoming'),
+            "organizer_id": organizer_id,
+        }
+
+        try:
+            response = supabase.table("tournaments").insert(tournament_data).execute()
+            if response.error:
+                raise Exception(response.error)
+            tournament_dict = response.data[0]
+        except Exception as e:
+            logger.error(f"Errore creazione tournament: {str(e)}")
+            logger.error(traceback.format_exc())
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+        return jsonify({"status": "success", "message": "Tournament created successfully", "data": tournament_dict}), 201
     except Exception as e:
         logger.error(f"Errore endpoint create tournament: {str(e)}")
         logger.error(traceback.format_exc())
@@ -922,83 +730,55 @@ def register_user():
                     "message": f"Missing required field: {field}"
                 }), 400
         
-        conn = get_db_connection()
-        if conn:
-            try:
-                cur = conn.cursor(cursor_factory=RealDictCursor)
-                
-                # Verifica se l'utente esiste già
-                cur.execute("SELECT * FROM users WHERE email = %s OR username = %s", (data['email'], data['username']))
-                existing_user = cur.fetchone()
-                
-                if existing_user:
-                    cur.close()
-                    conn.close()
-                    return jsonify({
-                        "status": "error",
-                        "message": "User with this email or username already exists"
-                    }), 409
-                
-                # Genera un nuovo UUID per l'utente
-                user_id = str(uuid.uuid4())
-                logger.info(f"Nuovo UUID utente generato: {user_id}")
-                
-                # Hash della password
-                password_hash = hash_password(data['password'])
-                
-                # Inserisci il nuovo utente
-                # Log dei parametri prima dell'esecuzione della query
-                logger.info(f"Parametri query INSERT users: id={user_id}, username={data['username']}, email={data['email']}")
-                
-                cur.execute("""
-                    INSERT INTO users (id, username, email, password_hash, wallet_address, created_at, is_active, is_verified)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    RETURNING *
-                """, (
-                    user_id,
-                    data['username'],
-                    data['email'],
-                    password_hash,
-                    data.get('wallet_address'),
-                    datetime.now(),
-                    True,
-                    False
-                ))
-                
-                user = cur.fetchone()
-                cur.close()
-                conn.close()
-                
-                # Converti UUID a stringa per JSON
-                user_dict = dict(user)
-                for key, value in user_dict.items():
-                    if isinstance(value, uuid.UUID):
-                        user_dict[key] = str(value)
-                
-                # Genera token JWT
-                token = generate_token(user_dict['id'])
-                
-                return jsonify({
-                    "status": "success",
-                    "message": "User registered successfully",
-                    "data": {
-                        "user": user_dict,
-                        "token": token
-                    }
-                }), 201
-            except Exception as e:
-                logger.error(f"Errore registrazione utente: {str(e)}")
-                logger.error(traceback.format_exc())
-                conn.close()
-                return jsonify({
-                    "status": "error",
-                    "message": str(e)
-                }), 500
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Database connection error"
-            }), 500
+        supabase = get_supabase_client()
+
+        # Verifica se l'utente esiste già
+        try:
+            existing = (
+                supabase.table("users")
+                .select("id")
+                .or_(f"email.eq.{data['email']},username.eq.{data['username']}")
+                .execute()
+            )
+            if existing.data:
+                return jsonify({"status": "error", "message": "User with this email or username already exists"}), 409
+        except Exception as e:
+            logger.error(f"Errore verifica utente esistente: {str(e)}")
+            logger.error(traceback.format_exc())
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+        user_id = str(uuid.uuid4())
+        logger.info(f"Nuovo UUID utente generato: {user_id}")
+
+        password_hash = hash_password(data['password'])
+        user_data = {
+            "id": user_id,
+            "username": data['username'],
+            "email": data['email'],
+            "password_hash": password_hash,
+            "wallet_address": data.get('wallet_address'),
+            "created_at": datetime.now().isoformat(),
+            "is_active": True,
+            "is_verified": False,
+        }
+
+        try:
+            response = supabase.table("users").insert(user_data).execute()
+            if response.error:
+                raise Exception(response.error)
+            user_dict = response.data[0]
+        except Exception as e:
+            logger.error(f"Errore registrazione utente: {str(e)}")
+            logger.error(traceback.format_exc())
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+        token = generate_token(user_dict['id'])
+
+        return jsonify({
+            "status": "success",
+            "message": "User registered successfully",
+            "data": {"user": user_dict, "token": token}
+        }), 201
     except Exception as e:
         logger.error(f"Errore endpoint register: {str(e)}")
         logger.error(traceback.format_exc())
@@ -1021,60 +801,25 @@ def login_user():
                     "message": f"Missing required field: {field}"
                 }), 400
         
-        conn = get_db_connection()
-        if conn:
-            try:
-                cur = conn.cursor(cursor_factory=RealDictCursor)
-                
-                # Verifica le credenziali
-                password_hash = hash_password(data['password'])
-                cur.execute("SELECT * FROM users WHERE email = %s AND password_hash = %s", (data['email'], password_hash))
-                user = cur.fetchone()
-                
-                if not user:
-                    cur.close()
-                    conn.close()
-                    return jsonify({
-                        "status": "error",
-                        "message": "Invalid email or password"
-                    }), 401
-                
-                # Converti UUID a stringa per JSON e per l'aggiornamento
-                user_dict = dict(user)
-                for key, value in user_dict.items():
-                    if isinstance(value, uuid.UUID):
-                        user_dict[key] = str(value)
-                
-                # Aggiorna last_login
-                cur.execute("UPDATE users SET last_login = %s WHERE id::text = %s", (datetime.now(), user_dict['id']))
-                
-                cur.close()
-                conn.close()
-                
-                # Genera token JWT
-                token = generate_token(user_dict['id'])
-                
-                return jsonify({
-                    "status": "success",
-                    "message": "Login successful",
-                    "data": {
-                        "user": user_dict,
-                        "token": token
-                    }
-                })
-            except Exception as e:
-                logger.error(f"Errore login utente: {str(e)}")
-                logger.error(traceback.format_exc())
-                conn.close()
-                return jsonify({
-                    "status": "error",
-                    "message": str(e)
-                }), 500
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Database connection error"
-            }), 500
+        supabase = get_supabase_client()
+        try:
+            password_hash = hash_password(data["password"])
+            response = (
+                supabase.table("users").select("*").eq("email", data["email"]).eq("password_hash", password_hash).single().execute()
+            )
+            if response.error or not response.data:
+                return jsonify({"status": "error", "message": "Invalid email or password"}), 401
+
+            user_dict = response.data
+            supabase.table("users").update({"last_login": datetime.now().isoformat()}).eq("id", user_dict["id"]).execute()
+
+            token = generate_token(user_dict["id"])
+
+            return jsonify({"status": "success", "message": "Login successful", "data": {"user": user_dict, "token": token}})
+        except Exception as e:
+            logger.error(f"Errore login utente: {str(e)}")
+            logger.error(traceback.format_exc())
+            return jsonify({"status": "error", "message": str(e)}), 500
     except Exception as e:
         logger.error(f"Errore endpoint login: {str(e)}")
         logger.error(traceback.format_exc())
@@ -1097,81 +842,37 @@ def create_investment():
                     "message": f"Missing required field: {field}"
                 }), 400
         
-        conn = get_db_connection()
-        if conn:
-            try:
-                cur = conn.cursor(cursor_factory=RealDictCursor)
-                
-                # Genera un nuovo UUID per l'investimento
-                investment_id = str(uuid.uuid4())
-                logger.info(f"Nuovo UUID investimento generato: {investment_id}")
-                
-                # Converti gli ID in stringhe UUID valide
-                try:
-                    user_id = str(uuid.UUID(data['user_id']))
-                    logger.info(f"UUID user_id validato: {user_id}")
-                except (ValueError, TypeError):
-                    logger.error(f"UUID user_id non valido: {data['user_id']}")
-                    return jsonify({
-                        "status": "error",
-                        "message": "Invalid user_id format"
-                    }), 400
-                
-                try:
-                    tournament_id = str(uuid.UUID(data['tournament_id']))
-                    logger.info(f"UUID tournament_id validato: {tournament_id}")
-                except (ValueError, TypeError):
-                    logger.error(f"UUID tournament_id non valido: {data['tournament_id']}")
-                    return jsonify({
-                        "status": "error",
-                        "message": "Invalid tournament_id format"
-                    }), 400
-                
-                # Log dei parametri prima dell'esecuzione della query
-                logger.info(f"Parametri query INSERT investments: id={investment_id}, user_id={user_id}, tournament_id={tournament_id}")
-                
-                # Inserisci il nuovo investimento
-                cur.execute("""
-                    INSERT INTO investments (id, user_id, tournament_id, amount, status, created_at)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING *
-                """, (
-                    investment_id,
-                    user_id,
-                    tournament_id,
-                    data['amount'],
-                    data.get('status', 'active'),
-                    datetime.now()
-                ))
-                
-                investment = cur.fetchone()
-                cur.close()
-                conn.close()
-                
-                # Converti UUID a stringa per JSON
-                investment_dict = dict(investment)
-                for key, value in investment_dict.items():
-                    if isinstance(value, uuid.UUID):
-                        investment_dict[key] = str(value)
-                
-                return jsonify({
-                    "status": "success",
-                    "message": "Investment created successfully",
-                    "data": investment_dict
-                }), 201
-            except Exception as e:
-                logger.error(f"Errore creazione investment: {str(e)}")
-                logger.error(traceback.format_exc())
-                conn.close()
-                return jsonify({
-                    "status": "error",
-                    "message": str(e)
-                }), 500
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Database connection error"
-            }), 500
+        supabase = get_supabase_client()
+
+        investment_id = str(uuid.uuid4())
+        logger.info(f"Nuovo UUID investimento generato: {investment_id}")
+        try:
+            user_id = str(uuid.UUID(data['user_id']))
+            tournament_id = str(uuid.UUID(data['tournament_id']))
+        except (ValueError, TypeError) as e:
+            logger.error(str(e))
+            return jsonify({"status": "error", "message": "Invalid ID format"}), 400
+
+        investment_data = {
+            "id": investment_id,
+            "user_id": user_id,
+            "tournament_id": tournament_id,
+            "amount": data['amount'],
+            "status": data.get('status', 'active'),
+            "created_at": datetime.now().isoformat(),
+        }
+
+        try:
+            response = supabase.table("investments").insert(investment_data).execute()
+            if response.error:
+                raise Exception(response.error)
+            investment_dict = response.data[0]
+        except Exception as e:
+            logger.error(f"Errore creazione investment: {str(e)}")
+            logger.error(traceback.format_exc())
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+        return jsonify({"status": "success", "message": "Investment created successfully", "data": investment_dict}), 201
     except Exception as e:
         logger.error(f"Errore endpoint create investment: {str(e)}")
         logger.error(traceback.format_exc())
