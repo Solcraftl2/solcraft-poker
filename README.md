@@ -62,6 +62,7 @@ cd backend && pip install -r requirements.txt && cd ..
 ```
 
 3. **Configurazione ambiente**
+Copiate i file `.env.example` presenti in ciascuna cartella e personalizzateli con i vostri valori. Gli esempi includono tutte le variabili necessarie, come i campi `NEXT_PUBLIC_FIREBASE_*` per il frontend e `SUPABASE_SERVICE_ROLE_KEY` per il backend.
 ```bash
 # Copia e configura variabili d'ambiente
 cp frontend/.env.example frontend/.env.local
