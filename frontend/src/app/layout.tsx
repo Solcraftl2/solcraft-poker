@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import WalletConnectionProvider from "@/components/wallet/WalletConnectionProvider";
 
 export const metadata: Metadata = {
   title: 'SolCraft',
@@ -25,7 +26,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        {children}
+        <WalletConnectionProvider>
+          {children}
+        </WalletConnectionProvider>
         <Toaster />
       </body>
     </html>
