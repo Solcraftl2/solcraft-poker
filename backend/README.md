@@ -56,7 +56,7 @@ Il backend utilizza PostgreSQL su Supabase come database. La connessione è conf
 
 ## Struttura del Progetto
 
-- `/api`: Endpoint API Flask
+- `/api`: Router API FastAPI
 - `/models`: Modelli di dati
 - `/services`: Logica di business
 - `/utils`: Utility e helper functions
@@ -77,4 +77,4 @@ Il backend utilizza PostgreSQL su Supabase come database. La connessione è conf
    SMTP_USER=your-smtp-user
    SMTP_PASS=your-smtp-password
    ```
-4. Avvia il server di sviluppo: `vercel dev`
+4. Avvia il server di sviluppo: `python main.py`
