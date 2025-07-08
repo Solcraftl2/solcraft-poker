@@ -20,6 +20,8 @@ backend/build/
 .env.production.local
 frontend/.env*
 backend/.env*
+!frontend/.env.example
+!backend/.env.example
 
 # IDE
 .vscode/

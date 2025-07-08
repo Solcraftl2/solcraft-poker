@@ -65,12 +65,14 @@ cd backend && pip install -r requirements.txt && cd ..
 
 ### 4. Configura le Variabili d'Ambiente
 
+Copia i file di esempio e personalizzali con le tue credenziali:
+
 ```bash
 # Frontend
 cp frontend/.env.example frontend/.env.local
 # Modifica frontend/.env.local con le tue configurazioni
 
-# Backend  
+# Backend
 cp backend/.env.example backend/.env
 # Modifica backend/.env con le tue configurazioni
 ```
