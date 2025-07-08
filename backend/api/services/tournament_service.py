@@ -5,14 +5,21 @@ from typing import List, Optional, Dict, Any
 from uuid import UUID
 import logging
 from datetime import datetime
-from ..config.database import get_supabase_client
+import os
+from supabase import create_client, Client
 from ..models.tournament_models import RANKING_CONFIG
 
 logger = logging.getLogger(__name__)
 
 class TournamentService:
     def __init__(self):
-        self.supabase = get_supabase_client()
+        """Initialise Supabase client using environment variables."""
+        supabase_url = os.getenv("SUPABASE_URL")
+        supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+        if not supabase_url or not supabase_key:
+            raise ValueError("Supabase credentials are not configured")
+
+        self.supabase: Client = create_client(supabase_url, supabase_key)
 
     def create_tournament(
         self,
