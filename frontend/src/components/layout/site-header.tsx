@@ -20,6 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import type { NavItem } from "@/lib/types";
+import { WalletConnectButton } from "@/components/wallet/WalletConnectButton";
+import { NetworkSwitcher } from "@/components/wallet/NetworkSwitcher";
 import { 
   LayoutGrid,
   User, 
@@ -114,6 +116,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
+          <NetworkSwitcher />
+          <WalletConnectButton />
           <div className="hidden md:flex items-center">
             <Button variant="ghost" className="w-full justify-start" onClick={handleLogout} disabled={isLoggingOut}>
               {isLoggingOut ? (
