@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Search, Users, Award, UserCheck, Loader2 } from "lucide-react";
 import type { SocialPlayer } from "@/lib/types";
-import { getPlayers, toggleFollow } from "@/lib/actions/social.actions";
+import { getPlayers as getPlayersFromServer, toggleFollow } from "@/lib/actions/social.actions";
+import api from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, type User } from "firebase/auth";
@@ -34,10 +35,15 @@ export default function SocialPage() {
   useEffect(() => {
     const fetchPlayers = async () => {
       setIsLoading(true);
-      // In a real app, you'd also fetch the current user's following list
-      // to determine the initial `isFollowed` state. Here, we'll keep it false by default.
-      const fetchedPlayers = await getPlayers();
-      setPlayers(fetchedPlayers.map(p => ({ ...p, isFollowed: p.isFollowed || false })));
+      try {
+        const apiPlayers = await api.getPlayers();
+        const formatted = Array.isArray(apiPlayers) ? apiPlayers : [];
+        setPlayers(formatted.map(p => ({ ...p, isFollowed: p.isFollowed || false })) as any);
+      } catch (err) {
+        console.error("Error fetching players from API:", err);
+        const fallback = await getPlayersFromServer();
+        setPlayers(fallback.map(p => ({ ...p, isFollowed: p.isFollowed || false })));
+      }
       setIsLoading(false);
     };
     fetchPlayers();

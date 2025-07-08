@@ -162,3 +162,22 @@ class PlayerProfileService:
         except Exception as e:
             logger.error(f"Error in get_player_profile_with_stats: {str(e)}")
             raise
+
+    async def list_players(self, limit: int = 50, offset: int = 0):
+        """Retrieve a list of player profiles."""
+        try:
+            response = (
+                self.supabase
+                .table("players")
+                .select("*")
+                .range(offset, offset + limit - 1)
+                .execute()
+            )
+
+            if "error" in response:
+                raise Exception(f"Error listing players: {response['error']}")
+
+            return response["data"]
+        except Exception as e:
+            logger.error(f"Error in list_players: {str(e)}")
+            raise
