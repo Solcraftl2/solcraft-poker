@@ -1,20 +1,27 @@
 
 import { notFound } from "next/navigation";
 import { mockSocialPlayers, mockInvestments } from "@/lib/mock-data";
+import api from "@/lib/api-config";
 import { PublicProfileClient } from "@/components/profile/public-profile-client";
 
-// This function would typically fetch data from a DB or API
 async function getPlayerData(username: string) {
-  // Find the player in mock data
-  const player = mockSocialPlayers.find(
-    (p) => p.username.toLowerCase() === username.toLowerCase()
-  );
-  if (!player) {
-    return null;
+  try {
+    const players = await api.getPlayers();
+    const player = (Array.isArray(players) ? players : []).find(
+      (p: any) => p.username && p.username.toLowerCase() === username.toLowerCase()
+    );
+    if (!player) return null;
+    const investments = mockInvestments.filter(inv => inv.investorId === player.id);
+    return { player, investments };
+  } catch (err) {
+    console.error('Failed to fetch player profile', err);
+    const fallback = mockSocialPlayers.find(
+      (p) => p.username.toLowerCase() === username.toLowerCase()
+    );
+    if (!fallback) return null;
+    const investments = mockInvestments.filter(inv => inv.investorId === fallback.id);
+    return { player: fallback, investments };
   }
-  // Find investments for this player (mocking this)
-  const investments = mockInvestments.filter(inv => inv.investorId === player.id);
-  return { player, investments };
 }
 
 export default async function PublicProfilePage({ params }: { params: { username: string } }) {

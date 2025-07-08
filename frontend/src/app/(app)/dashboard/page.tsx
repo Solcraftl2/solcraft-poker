@@ -20,6 +20,7 @@ import {
   mockInvestments,
   mockPoolState 
 } from "@/lib/mock-data";
+import api from "@/lib/api-config";
 import { TournamentCard } from "@/components/tournaments/tournament-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth, db } from '@/lib/firebase';
@@ -33,10 +34,22 @@ export default function DashboardPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dynamicKeyMetrics, setDynamicKeyMetrics] = useState<KeyMetric[]>(defaultMockKeyMetrics);
   const [isLoading, setIsLoading] = useState(true);
-
-  const featuredTournaments = mockTournaments.filter(t => t.status === 'Upcoming' || t.status === 'Live').slice(0, 3);
+  const [tournaments, setTournaments] = useState<Tournament[]>(mockTournaments);
+  const featuredTournaments = tournaments.filter(t => t.status === 'Upcoming' || t.status === 'Live').slice(0, 3);
 
   useEffect(() => {
+    const loadTournaments = async () => {
+      try {
+        const data = await api.getTournaments();
+        if (Array.isArray(data)) {
+          setTournaments(data as any);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tournaments:', err);
+      }
+    };
+    loadTournaments();
+
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setAuthUser(currentUser);
