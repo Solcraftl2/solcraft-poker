@@ -1,10 +1,15 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Network, ShieldCheck, ArrowRightLeft, Coins, ListChecks, LockKeyhole, Rocket, Bot, Award, FileScan, PieChart, Users, GitFork, BarChart, Layers, Zap, Smile, Linkedin, Twitter, LogIn } from 'lucide-react';
 import Image from 'next/image';
 import type { RoadmapItemProps } from '@/lib/types';
 import { roadmapItems } from '@/lib/mock-data';
+import { useState } from 'react';
+import { ConnectWalletDialog } from '@/components/shared/connect-wallet-dialog';
+import { useRouter } from 'next/navigation';
 // for the purpose
 const RoadmapItem: React.FC<RoadmapItemProps> = ({ quarter, year, milestones, isOffset, isLast }) => {
   return (
@@ -74,6 +79,22 @@ const TokenomicsChart = () => {
 
 
 export default function LandingPage() {
+  const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false);
+  const router = useRouter();
+  
+  const handleLaunchApp = () => {
+    setIsWalletDialogOpen(true);
+  };
+  
+  const handleWalletConnect = (walletName: string) => {
+    // Simulate wallet connection
+    console.log(`Connecting to ${walletName}...`);
+    setIsWalletDialogOpen(false);
+    
+    // Redirect to dashboard after successful connection
+    router.push('/dashboard');
+  };
+
   const featureCardBaseClass = "bg-purple-600/10 backdrop-blur-sm p-6 rounded-lg shadow-xl h-full flex flex-col";
   const featureCardTitleClass = "text-lg font-semibold mb-2 text-white flex items-center";
   const featureCardIconClass = "mr-3 h-6 w-6 text-purple-400";
@@ -110,8 +131,8 @@ export default function LandingPage() {
               Team
             </Link>
           </nav>
-          <Button variant="outline" className="text-white border-purple-500 hover:bg-purple-600 hover:text-white text-xs sm:text-sm" asChild>
-            <Link href="/login">Launch App</Link>
+          <Button variant="outline" className="text-white border-purple-500 hover:bg-purple-600 hover:text-white text-xs sm:text-sm" onClick={handleLaunchApp}>
+            Launch App
           </Button>
         </div>
       </header>
@@ -135,11 +156,9 @@ export default function LandingPage() {
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-white border-purple-500 hover:bg-purple-600 hover:text-white text-lg px-8 py-3 rounded-lg font-semibold" asChild>
-                <Link href="/dashboard">
-                  Launch App
-                  <LogIn className="ml-2 h-5 w-5" />
-                </Link>
+              <Button size="lg" variant="outline" className="text-white border-purple-500 hover:bg-purple-600 hover:text-white text-lg px-8 py-3 rounded-lg font-semibold" onClick={handleLaunchApp}>
+                Launch App
+                <LogIn className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -406,6 +425,13 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Wallet Connection Dialog */}
+      <ConnectWalletDialog 
+        open={isWalletDialogOpen}
+        onOpenChange={setIsWalletDialogOpen}
+        onConnect={handleWalletConnect}
+      />
     </div>
   );
 }

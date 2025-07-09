@@ -1,123 +1,158 @@
+// Tipi aggiornati per SolCraft Poker - Integrazione Blockchain
+import { LucideIcon } from 'lucide-react';
 
-import type { TournamentRiskAssessmentOutput } from '@/ai/flows/tournament-risk-assessment';
-import type { LucideIcon } from 'lucide-react';
+// ==================== WALLET & BLOCKCHAIN ====================
 
-export interface NavItem {
-  title: string;
-  href: string;
-  icon: LucideIcon;
-  disabled?: boolean;
+export interface WalletInfo {
+  wallet: string;
+  solp_balance: number;
+  sol_balance: number;
+  staked_amount: number;
+  pending_rewards: number;
+  last_updated: number;
 }
 
-export interface TournamentTokenizationDetails {
-  isTokenized: boolean;
-  tokenTicker: string; // e.g., "TRNT"
-  tokenPrice: number; // e.g., 1 (representing $1 per token)
-  totalTokenSupply: number; // Derived from buyInAmount / tokenPrice
-  minInvestmentTokens: number;
-  maxInvestmentTokens: number; // Could be equal to totalTokenSupply for full backing
+export interface BlockchainTransaction {
+  signature: string;
+  timestamp: number;
+  type: 'tournament_create' | 'tournament_register' | 'stake' | 'unstake' | 'vote' | 'transfer';
+  amount?: number;
+  status: 'pending' | 'confirmed' | 'failed';
 }
+
+// ==================== TOURNAMENTS ====================
 
 export interface Tournament {
   id: string;
   name: string;
   buyIn: number;
   guaranteedPrizePool: number;
-  startTime: string; // ISO string
-  status: 'Upcoming' | 'Live' | 'Finished';
-  participants?: {
+  startTime: string;
+  status: 'Upcoming' | 'Live' | 'Completed' | 'Cancelled';
+  participants: {
     current: number;
-    max?: number;
+    max: number;
   };
-  imageUrl?: string;
-  description?: string;
-  platform?: string; // e.g., "PokerStars", "Online", "Live Event"
-  averagePlayers?: number; // For AI input
-  historicalData?: string; // For AI input, can be a longer text
-  aiRiskAssessment?: TournamentRiskAssessmentOutput; // Store pre-computed or on-demand
-  tokenizationDetails?: TournamentTokenizationDetails;
-  prizeWon?: number;
-  isCompleted?: boolean;
-  raisedAmount?: number;
+  imageUrl: string;
+  description: string;
+  platform: string;
+  averagePlayers: number;
+  historicalData: string;
+  raisedAmount: number;
+  aiRiskAssessment: {
+    riskLevel: 'Low' | 'Medium' | 'High';
+    riskFactors: string[];
+    investmentRecommendation: string;
+    potentialReturn: string;
+  };
+  tokenizationDetails: TournamentTokenizationDetails;
+  isCompleted: boolean;
+  // Blockchain specific fields
+  organizer?: string;
+  transaction_signature?: string;
+  blockchain_id?: number;
 }
 
-export interface InvestmentTier {
+export interface TournamentTokenizationDetails {
+  isTokenized: boolean;
+  tokenTicker: string;
+  tokenPrice: number;
+  totalTokenSupply: number;
+  minInvestmentTokens: number;
+  maxInvestmentTokens: number;
+}
+
+// ==================== STAKING ====================
+
+export interface StakingPool {
   id: string;
   name: string;
-  minInvestmentCurrency: number;
-  maxInvestmentCurrency?: number;
-  minInvestmentTokens: number;
-  maxInvestmentTokens?: number;
-  platformFeePercentage: number; // e.g., 5 for 5%
-  priorityDescription?: string;
-  potentialReturn: string;
-  riskLevel: 'Low' | 'Medium' | 'High';
-  description: string;
-  benefits: string[];
+  apy: number;
+  totalStaked: number;
+  lockPeriod: number; // in days
+  maxStakeAmount: number;
+  activeStakers: number;
+  status: 'active' | 'paused' | 'closed';
+  rewardsDistributed: number;
+  createdAt: string;
+  // Blockchain specific
+  creator?: string;
+  blockchain_id?: number;
 }
 
+export interface StakingSummary {
+  totalStaked: number;
+  totalRewards: number;
+  activeStakes: number;
+  averageAPY: number;
+}
+
+export interface UserStake {
+  poolId: string;
+  amount: number;
+  stakedAt: string;
+  unlockAt: string;
+  rewardsEarned: number;
+  status: 'active' | 'unlocked' | 'withdrawn';
+}
+
+// ==================== GOVERNANCE ====================
+
+export interface GovernanceProposal {
+  id: string;
+  title: string;
+  description: string;
+  proposer: string;
+  votesFor: number;
+  votesAgainst: number;
+  status: 'active' | 'passed' | 'rejected' | 'executed';
+  createdAt: string;
+  votingEndsAt: string;
+  totalVotes: number;
+  // Blockchain specific
+  blockchain_id?: number;
+  quorum_required?: number;
+}
+
+export interface UserVote {
+  proposalId: string;
+  vote: boolean; // true = for, false = against
+  votingPower: number;
+  timestamp: string;
+}
+
+// ==================== USER & PROFILE ====================
+
 export interface UserProfile {
-  id:string;
   uid: string;
   email: string;
-  name: string;
-  username: string;
-  avatarUrl?: string;
-  bio?: string;
-  joinedDate: string; // ISO string
-  followersCount: number;
-  followingCount: number;
-  totalInvested: number;
-  overallReturn: number; // percentage or absolute
-  ranking?: number | null;
-  isWalletConnected?: boolean;
+  displayName: string;
+  photoURL?: string;
   walletAddress?: string;
-  balance?: {
-    amount: number;
-    currency: string;
-  };
+  totalInvested?: number;
+  overallReturn?: number;
   currentInvestmentTierName?: string;
-  notificationSettings?: {
-    investmentUpdates: boolean;
-    newTournaments: boolean;
-    socialActivity: boolean;
-    platformNews: boolean;
-  };
-  referralCode?: string;
+  joinedAt: string;
+  lastActive: string;
+  // Blockchain stats
+  totalStaked?: number;
+  governanceVotes?: number;
+  tournamentsPlayed?: number;
 }
 
 export interface Investment {
   id: string;
-  investorId: string;
   tournamentId: string;
-  tournamentName: string;
-  tierName?: string; // Could be the name of the tier like "Gold Access"
-  investmentValueUSD: number;
-  tokenAmount: number;
-  investmentDate: string; // ISO string
-  status: 'Active' | 'Cashed Out' | 'Lost' | 'Pending';
-  currentValue?: number;
-  returnOnInvestment?: number;
+  investorId: string;
+  amount: number;
+  percentage: number;
+  status: 'Active' | 'Completed' | 'Cancelled';
+  investedAt: string;
+  expectedReturn?: number;
+  actualReturn?: number;
 }
 
-export interface PortfolioData {
-  totalValue: number;
-  totalInvested: number;
-  overallReturn: number; // percentage
-  bestPerformingInvestment?: Investment;
-  worstPerformingInvestment?: Investment;
-}
-
-export interface SocialPlayer extends UserProfile {
-  recentPerformance: string;
-  isFollowed?: boolean;
-}
-
-export interface PortfolioAllocationItem {
-  name: string;
-  value: number;
-  color: string;
-}
+// ==================== UI COMPONENTS ====================
 
 export interface KeyMetric {
   id: string;
@@ -127,150 +162,273 @@ export interface KeyMetric {
   valueClassName?: string;
 }
 
-export interface Cryptocurrency {
-  id: string;
-  rank: number;
-  name: string;
-  ticker: string;
-  iconUrl?: string;
-  price: number;
-  change24h: number;
-  volume24h: number;
-  marketCap: number;
-}
-
 export interface RecentActivity {
   id: string;
-  type: 'Swap' | 'Deposit' | 'Withdrawal' | 'Investment' | 'Payout';
-  date: string;
-  time: string;
-  tokenAmount: string;
-  status: 'Completed' | 'In Progress' | 'Failed' | 'Pending';
-  viewLink?: string;
+  type: 'investment' | 'tournament' | 'staking' | 'governance';
+  description: string;
+  amount?: number;
+  timestamp: string;
+  status: 'completed' | 'pending' | 'failed';
+  transactionHash?: string;
 }
 
-export interface RoadmapItemProps {
-  quarter: string;
-  year: string;
-  milestones: string[];
-  isOffset?: boolean;
-  isLast?: boolean;
+export interface PortfolioData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string;
+    borderColor: string;
+    borderWidth: number;
+  }[];
 }
 
-// Types from pool-architecture.md
+export interface PortfolioAllocationItem {
+  name: string;
+  value: number;
+  color: string;
+  percentage: number;
+}
 
-// ---- Tournament Investment Pool Types ----
+export interface Cryptocurrency {
+  id: string;
+  name: string;
+  symbol: string;
+  price: number;
+  change24h: number;
+  marketCap: number;
+  volume24h: number;
+}
+
+// ==================== PLATFORM STATE ====================
+
 export interface PoolState {
-  totalDeposits: number;
-  activeTournamentsFunded: number; // Number of tournaments currently being funded
-  availableLiquidity: number;
-  pendingWithdrawals: number;
-  totalReturnsGenerated: number; // From completed tournaments
+  totalValueLocked: number;
+  totalUsers: number;
+  totalRewards: number;
+  averageAPY: number;
 }
 
 export interface TournamentAllocation {
-  id: string; // Unique ID for this allocation instance
-  tournamentId: string; // Refers to Tournament.id
-  tournamentName: string; // For display convenience
-  allocatedAmount: number;
-  status: 'Funding' | 'Active' | 'Completed' | 'Cancelled' | 'Refunding';
-  expectedReturnRate?: number; // Percentage
-  actualReturnAmount?: number;
-  numberOfInvestors?: number; // Number of distinct investors in this allocation
-}
-
-// ---- Player Deposit Pool Types ----
-export enum PlayerRank {
-  PLATINUM = "Platinum",
-  GOLD = "Gold",
-  SILVER = "Silver",
-  BRONZE = "Bronze",
-  UNVERIFIED = "Unverified",
-}
-
-export interface SubPoolState {
-  rankCategory: PlayerRank;
-  totalDeposits: number;
-  totalLockedFunds: number;
-  availableForWithdrawal: number;
-  totalPenaltyFundsCollected: number;
-  numberOfPlayers: number;
+  tournamentName: string;
+  allocation: number;
+  color: string;
 }
 
 export interface PlayerDeposit {
-  id: string; // Unique ID for this deposit
-  playerId: string; // Refers to UserProfile.uid
-  playerName?: string; // For display convenience
-  playerRank: PlayerRank;
-  depositAmount: number;
-  currency: string; // e.g., 'USD', 'SOL'
-  tournamentId?: string; // Optional, if a deposit is for a specific tournament
-  status: 'Pending' | 'Locked' | 'PartiallyRefunded' | 'FullyRefunded' | 'Penalized' | 'ForfeitedToCompensation';
-  depositDate: string; // ISO string
-  resolutionDate?: string; // ISO string, when the deposit status was finalized
-  notes?: string;
+  playerName: string;
+  amount: number;
+  timestamp: string;
 }
 
-// ---- Launchtoken Page Types ----
+export interface SubPoolState {
+  name: string;
+  tvl: number;
+  apy: number;
+  participants: number;
+}
+
+// ==================== TOKEN LAUNCH ====================
+
 export interface TokenLaunch {
   id: string;
   name: string;
-  ticker: string;
-  logoUrl: string;
+  symbol: string;
   description: string;
-  stage: 'Upcoming' | 'Live' | 'Ended' | 'TBA'; // TBA: To Be Announced
-  targetRaise: number; // In currency
-  raisedAmount: number; // In currency
-  tokenPrice: number; // Price per token in currency
-  currency: string; // e.g., USDC, SOL
-  startDate?: string; // ISO string
-  endDate?: string; // ISO string
-  projectWebsite?: string;
-  whitepaperLink?: string;
-  detailsLink: string; // Link to a detailed page for this launch within SolCraft
-  category?: string; // e.g., DeFi, GameFi, Infra, Meme
-  isFeatured?: boolean;
-  tags?: string[]; // e.g., ["AI", "Layer 2", "Gaming"]
-  vestingSchedule?: string; // "10% TGE, 6 month linear"
-  totalSupply?: number;
-  circulatingSupplyOnLaunch?: number;
+  totalSupply: number;
+  initialPrice: number;
+  launchDate: string;
+  status: 'upcoming' | 'live' | 'completed';
+  raisedAmount: number;
+  targetAmount: number;
+  participants: number;
 }
 
-// ---- Staking Page Types ----
-export interface StakingSummary {
-  totalStakedUSD: number;
-  totalRewardsEarnedUSD: number;
-  averageAPY: number; // percentage
-  activeStakesCount: number;
+// ==================== ENUMS ====================
+
+export enum PlayerRank {
+  BRONZE = 'BRONZE',
+  SILVER = 'SILVER', 
+  GOLD = 'GOLD',
+  PLATINUM = 'PLATINUM'
 }
 
-export interface StakingPool {
+export enum InvestmentTier {
+  BRONZE = 'Bronze',
+  SILVER = 'Silver',
+  GOLD = 'Gold',
+  PLATINUM = 'Platinum'
+}
+
+// ==================== INVESTMENT TIERS ====================
+
+export interface InvestmentTier {
+  name: string;
+  minInvestment: number;
+  maxInvestment: number;
+  feeReduction: number;
+  priorityAccess: boolean;
+  icon: LucideIcon;
+  color: string;
+  benefits: string[];
+}
+
+// ==================== SOCIAL FEATURES ====================
+
+export interface SocialPlayer {
   id: string;
-  assetName: string;
-  assetTicker: string;
-  assetLogoUrl: string;
-  apy: number; // percentage, could be a range string like "5-7%" or a number
-  lockUpPeriod: string; // e.g., "Flexible", "30 Days", "90 Days", "1 Year"
-  minStake?: number; // in asset's own unit (e.g, 100 SOL)
-  maxStake?: number; // in asset's own unit
-  totalStakedInPoolUSD: number; // Total value staked by all users in this pool
-  userStakedAmount?: number; // Amount user has staked in this pool (in asset's unit)
-  userRewardsEarned?: number; // Rewards user earned from this pool (in asset's unit)
-  platform: string; // e.g., SolCraft Native, Lido, Marinade
-  riskLevel: 'Low' | 'Medium' | 'High';
-  detailsLink: string; // Link to a detailed page for this staking option
-  type: 'Native' | 'Liquid' | 'LP Farming'; // Staking type
-  isFeatured?: boolean;
-  availableToStake: boolean; // Is the pool currently open for new stakes
+  name: string;
+  avatar: string;
+  rank: PlayerRank;
+  totalWinnings: number;
+  winRate: number;
+  followers: number;
+  isFollowing: boolean;
 }
 
-export interface SupportTicket {
-    id?: string;
-    name: string;
-    email: string;
-    subject: string;
-    message: string;
-    createdAt: string; // ISO String
-    status: 'open' | 'closed';
-    userId?: string;
+// ==================== ROADMAP ====================
+
+export interface RoadmapItemProps {
+  quarter: string;
+  title: string;
+  description: string;
+  status: 'completed' | 'in-progress' | 'upcoming';
+  features: string[];
 }
+
+// ==================== API RESPONSES ====================
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+// ==================== BLOCKCHAIN EVENTS ====================
+
+export interface BlockchainEvent {
+  id: string;
+  type: 'tournament_created' | 'player_registered' | 'stake_added' | 'proposal_created' | 'vote_cast';
+  data: any;
+  timestamp: string;
+  blockNumber?: number;
+  transactionHash?: string;
+}
+
+// ==================== ANALYTICS ====================
+
+export interface PlatformAnalytics {
+  tournaments: {
+    total: number;
+    active: number;
+    total_prize_pool: number;
+  };
+  staking: {
+    total_pools: number;
+    total_staked: number;
+    active_stakers: number;
+  };
+  governance: {
+    total_proposals: number;
+    active_proposals: number;
+  };
+  last_updated: number;
+}
+
+// ==================== ERROR HANDLING ====================
+
+export interface ErrorState {
+  hasError: boolean;
+  message: string;
+  code?: string;
+  timestamp: string;
+}
+
+// ==================== LOADING STATES ====================
+
+export interface LoadingState {
+  isLoading: boolean;
+  operation?: string;
+  progress?: number;
+}
+
+// ==================== FORM TYPES ====================
+
+export interface TournamentCreateForm {
+  name: string;
+  description: string;
+  buyIn: number;
+  maxPlayers: number;
+  startTime: string;
+  prizeStructure: number[];
+}
+
+export interface StakingForm {
+  poolId: string;
+  amount: number;
+  lockPeriod: number;
+}
+
+export interface GovernanceForm {
+  title: string;
+  description: string;
+  votingPeriod: number;
+  proposalType: 'general' | 'parameter_change' | 'treasury_spend';
+}
+
+// ==================== NOTIFICATION TYPES ====================
+
+export interface Notification {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  actionUrl?: string;
+}
+
+// Export all types for easy importing
+export type {
+  Tournament,
+  StakingPool,
+  GovernanceProposal,
+  UserProfile,
+  Investment,
+  KeyMetric,
+  RecentActivity,
+  PortfolioData,
+  PortfolioAllocationItem,
+  Cryptocurrency,
+  PoolState,
+  TournamentAllocation,
+  PlayerDeposit,
+  SubPoolState,
+  TokenLaunch,
+  InvestmentTier,
+  SocialPlayer,
+  RoadmapItemProps,
+  WalletInfo,
+  BlockchainTransaction,
+  UserStake,
+  UserVote,
+  BlockchainEvent,
+  PlatformAnalytics,
+  ErrorState,
+  LoadingState,
+  TournamentCreateForm,
+  StakingForm,
+  GovernanceForm,
+  Notification
+};
+
