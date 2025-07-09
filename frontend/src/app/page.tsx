@@ -8,7 +8,7 @@ import Image from 'next/image';
 import type { RoadmapItemProps } from '@/lib/types';
 import { roadmapItems } from '@/lib/mock-data';
 import { useState } from 'react';
-import { ConnectWalletDialogReal } from '@/components/shared/connect-wallet-dialog-real';
+import { ConnectWalletDialogSimple } from '@/components/shared/connect-wallet-dialog-simple';
 import { useRouter } from 'next/navigation';
 // for the purpose
 const RoadmapItem: React.FC<RoadmapItemProps> = ({ quarter, year, milestones, isOffset, isLast }) => {
@@ -427,7 +427,7 @@ export default function LandingPage() {
       </footer>
 
       {/* Wallet Connection Dialog */}
-      <ConnectWalletDialogReal 
+      <ConnectWalletDialogSimple 
         open={isWalletDialogOpen}
         onOpenChange={setIsWalletDialogOpen}
         onConnect={handleWalletConnect}
