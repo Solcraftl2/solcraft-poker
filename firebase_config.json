@@ -1,13 +1,14 @@
 {
   "type": "service_account",
-  "project_id": "solcraft-poker-dev",
-  "private_key_id": "PLACEHOLDER_KEY_ID",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nPLACEHOLDER_PRIVATE_KEY\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk@solcraft-poker-dev.iam.gserviceaccount.com",
-  "client_id": "PLACEHOLDER_CLIENT_ID",
+  "project_id": "solcraft-poker-vercel",
+  "private_key_id": "temp_key_id_for_development",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKB\nxCOGWxwhcW2XgqAGkzQzFSz2y+/gEXVIp+zIrOjW4ASdYdKVNU89QjvQbaq2uuU\nOoYWSjb/pLjrQlt+aLTDzxq4+deVxQ26fwOD6oxwqQD2j2EETQE6aYff8oVuVU\nYelSvyluJapHyeHdxhpY+05HKnf+CHZJKZUBHQDJOECVWHCL2MT/1xvvNnzzIo\nE2KiHXxuBsYoEFBuKdvEyFBliGhg1xEXpRIjkoJlNAzSHhHgHQi+7+2n6RQXd\nwwNkhd+2aAkR+32H2jmMQe+A/PxVCWXkZ/4M07+1fVBNZx+9Jhlotgn5x9pcV\nH+AAOCXZS5AgMBAAECggEBALSMxFxGqX7+aJXBWINhPGBpzYwd7fzwaxHqHb+S\n6o7cZQzOT+ESAYhqsb+mg6pdqtPir5D5U+eJcrm7HMdcj2eTkLJXLJqjmNqtv\nTvYgP5aeGrHoRXmaK+UrKnw+XDKLG+EqhXXyuvRlPCPR+KJXn2c1luJmwBBDf\nYJmNfzlHjmBg6na7RXGOLrOC5bfI1ZVUb+qhqmYnV8wA1ma+T+lrPiT5h9YV\nKw+UNhABRBNqHMK2+lbADmuBG9jisqy3dHFOxbsmkuRcnOkykJy0bEizqN5\nX2oAhvQiXyobB0G90h4KEe7VMWEyZofk+jqgofkbOoGECgYEA5aBvobKinQ9\nwGCO2l2hM0tk7xvqbQocQn3ndHAlMjnTlqrjLoYAaAQxWtGrnpbPBacgBgYB\nAgMBAAECggEBAKdlB4tWT7ue/N2WQdZy4xGi5F3RM70T2T9Z/5xmHI7jpe/9\nGtQQ+Bxb92WpuEwOHDQaHKXs1qyN0C+YjzRLnmc/9S5Ir9D6Z8jKuQiLKwP\nTvYgP5aeGrHoRXmaK+UrKnw+XDKLG+EqhXXyuvRlPCPR+KJXn2c1luJmwBBDf\nYJmNfzlHjmBg6na7RXGOLrOC5bfI1ZVUb+qhqmYnV8wA1ma+T+lrPiT5h9YV\nKw+UNhABRBNqHMK2+lbADmuBG9jisqy3dHFOxbsmkuRcnOkykJy0bEizqN5\nX2oAhvQiXyobB0G90h4KEe7VMWEyZofk+jqgofkbOoGECgYEA5aBvobKinQ9\nwGCO2l2hM0tk7xvqbQocQn3ndHAlMjnTlqrjLoYAaAQxWtGrnpbPBacgBgYB\nAgMBAAECggEBAKdlB4tWT7ue/N2WQdZy4xGi5F3RM70T2T9Z/5xmHI7jpe/9\nGtQQ+Bxb92WpuEwOHDQaHKXs1qyN0C+YjzRLnmc/9S5Ir9D6Z8jKuQiLKwP\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@solcraft-poker-vercel.iam.gserviceaccount.com",
+  "client_id": "878156591343",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk%40solcraft-poker-dev.iam.gserviceaccount.com"
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40solcraft-poker-vercel.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
 }
 

@@ -163,14 +163,13 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="md:w-1/2 mt-12 md:mt-0 flex justify-center items-center">
-            <Image 
-              src="[url=https://postimg.cc/Fk52M4cX][img]https://i.postimg.cc/Fk52M4cX/7.jpg[/img][/url]" 
-              alt="Solcraft Platform Visual" 
-              width={600} 
-              height={400} 
-              className="rounded-lg shadow-2xl"
-              data-ai-hint="blockchain poker"
-            />
+            <div className="w-[600px] h-[400px] bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg shadow-2xl flex items-center justify-center">
+              <div className="text-center text-white">
+                <div className="text-6xl mb-4">🃏</div>
+                <div className="text-xl font-bold">SolCraft Poker</div>
+                <div className="text-sm opacity-80">Blockchain Gaming Platform</div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -192,14 +191,12 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="hidden md:flex justify-center items-center">
-               <Image 
-                src="https://i.postimg.cc/D08nbfw0/7.jpg" 
-                alt="Solcraft Layer Structure" 
-                width={300} 
-                height={300} 
-                className="rounded-lg shadow-2xl opacity-70"
-                data-ai-hint="blockchain layer structure"
-              />
+               <div className="w-[300px] h-[300px] bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg shadow-2xl opacity-70 flex items-center justify-center">
+                 <div className="text-center text-white">
+                   <div className="text-4xl mb-2">⚡</div>
+                   <div className="text-sm font-bold">Layer Structure</div>
+                 </div>
+               </div>
             </div>
           </div>
         </section>

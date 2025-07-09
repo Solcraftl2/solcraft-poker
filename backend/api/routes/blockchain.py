@@ -7,9 +7,7 @@ from typing import List, Optional, Dict, Any
 import logging
 from datetime import datetime
 
-from ..services.blockchain_service import get_blockchain_service, SolanaBlockchainService
-from ..services.tournament_service_firebase import TournamentService
-from ..config.database import get_firestore_client
+from ..services.blockchain_service_simple import get_blockchain_service, SolanaBlockchainService
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)

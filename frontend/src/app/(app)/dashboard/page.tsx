@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Activity, Award, TrendingUp, Crown, Landmark, AlertCircle, Wifi, WifiOff, Home, User, Trophy, ArrowLeftRight, Send, Rocket, Coins } from 'lucide-react';
 import Link from 'next/link';
+// import { useTournaments } from '@/hooks/useTournaments';
 
 // Simple mock data for immediate functionality
 const mockKeyMetrics = [
@@ -14,15 +15,15 @@ const mockKeyMetrics = [
   { title: "Staked SOLP", value: "1,250", change: "+8.3%", icon: Coins },
 ];
 
-const mockTournaments = [
-  { id: 1, name: "Weekly High Stakes", buyIn: 100, prizePool: 5000, players: 45, status: "Live" },
-  { id: 2, name: "Daily Grind", buyIn: 25, prizePool: 1250, players: 32, status: "Registering" },
-  { id: 3, name: "Sunday Special", buyIn: 200, prizePool: 10000, players: 28, status: "Starting Soon" },
-];
-
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [walletConnected, setWalletConnected] = useState(false);
+  
+  // Use real tournament data - temporarily commented for testing
+  // const { tournaments, loading: tournamentsLoading, error: tournamentsError } = useTournaments('upcoming', 3);
+  const tournaments = [];
+  const tournamentsLoading = false;
+  const tournamentsError = null;
 
   useEffect(() => {
     // Check if wallet is connected
@@ -144,25 +145,40 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockTournaments.map((tournament) => (
-                  <div key={tournament.id} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-                    <div>
-                      <h3 className="font-semibold text-white">{tournament.name}</h3>
-                      <p className="text-sm text-gray-400">
-                        Buy-in: ${tournament.buyIn} • Prize Pool: ${tournament.prizePool} • Players: {tournament.players}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        tournament.status === 'Live' ? 'bg-green-600 text-white' :
-                        tournament.status === 'Registering' ? 'bg-blue-600 text-white' :
-                        'bg-yellow-600 text-white'
-                      }`}>
-                        {tournament.status}
-                      </span>
-                      <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-                        Join
-                      </Button>
+                {tournamentsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
+                    <span className="ml-2 text-gray-400">Loading tournaments...</span>
+                  </div>
+                ) : tournamentsError ? (
+                  <div className="flex items-center justify-center py-8 text-red-400">
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                    <span>Failed to load tournaments</span>
+                  </div>
+                ) : tournaments.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">
+                    No tournaments available
+                  </div>
+                ) : (
+                  tournaments.map((tournament) => (
+                    <div key={tournament.id} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+                      <div>
+                        <h3 className="font-semibold text-white">{tournament.name}</h3>
+                        <p className="text-sm text-gray-400">
+                          Buy-in: ${tournament.buy_in} • Prize Pool: ${tournament.prize_pool} • Players: {tournament.current_players}/{tournament.max_players}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          tournament.status === 'active' ? 'bg-green-600 text-white' :
+                          tournament.status === 'upcoming' ? 'bg-blue-600 text-white' :
+                          'bg-yellow-600 text-white'
+                        }`}>
+                          {tournament.status}
+                        </span>
+                        <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                          Join
+                        </Button>
                     </div>
                   </div>
                 ))}

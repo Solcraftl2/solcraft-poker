@@ -12,6 +12,8 @@ from datetime import datetime
 
 # Import routes
 from api.routes.blockchain import router as blockchain_router
+from api.routes.users import router as users_router
+from api.routes.tournaments import router as tournaments_router
 
 # Configure logging
 logging.basicConfig(
@@ -39,7 +41,9 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(blockchain_router)
+app.include_router(blockchain_router, prefix="/api")
+app.include_router(users_router, prefix="/api")
+app.include_router(tournaments_router, prefix="/api")
 
 # Health check endpoint
 @app.get("/")
@@ -62,15 +66,15 @@ async def root():
 async def health_check():
     """Health check endpoint."""
     try:
-        # Test database connection
-        from api.config.database import db_config
-        db_connected = db_config.test_connection()
+        # Test Firebase connection
+        from api.services.firebase_service_real import firebase_service_real
+        firebase_connected = firebase_service_real.config is not None
         
         return {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
             "services": {
-                "database": "connected" if db_connected else "disconnected",
+                "firebase": "connected" if firebase_connected else "disconnected",
                 "blockchain": "available"
             },
             "version": "1.0.0"
