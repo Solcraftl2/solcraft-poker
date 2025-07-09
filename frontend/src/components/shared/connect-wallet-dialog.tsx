@@ -1,117 +1,214 @@
+'use client';
 
-"use client";
-
-import { useState } from "react";
-import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Wallet as WalletIcon, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Wallet, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
+// Wallet types
 interface WalletOption {
-  id: string;
   name: string;
-  iconUrl: string;
-  aiHint: string;
+  icon: string;
+  color: string;
+  installed?: boolean;
 }
 
-// Updated to common Solana wallet options
 const walletOptions: WalletOption[] = [
-  { id: "phantom", name: "Phantom", iconUrl: "https://placehold.co/48x48/A06FFA/FFFFFF.png?text=P", aiHint: "phantom logo" },
-  { id: "solflare", name: "Solflare", iconUrl: "https://placehold.co/48x48/F07A00/FFFFFF.png?text=S", aiHint: "solflare logo" },
-  { id: "backpack", name: "Backpack", iconUrl: "https://placehold.co/48x48/8A2BE2/FFFFFF.png?text=B", aiHint: "backpack logo" },
-  { id: "torus", name: "Torus", iconUrl: "https://placehold.co/48x48/0074FF/FFFFFF.png?text=T", aiHint: "torus logo" },
-  { id: "ledger", name: "Ledger", iconUrl: "https://placehold.co/48x48/4A4A4A/FFFFFF.png?text=L", aiHint: "ledger logo" },
-  { id: "glow", name: "Glow", iconUrl: "https://placehold.co/48x48/FFA500/000000.png?text=G", aiHint: "glow wallet logo" },
+  { name: 'Phantom', icon: 'P', color: 'bg-purple-500', installed: true },
+  { name: 'Solflare', icon: 'S', color: 'bg-orange-500', installed: false },
+  { name: 'Backpack', icon: 'B', color: 'bg-purple-700', installed: false },
+  { name: 'Torus', icon: 'T', color: 'bg-blue-500', installed: false },
+  { name: 'Ledger', icon: 'L', color: 'bg-gray-600', installed: false },
+  { name: 'Glow', icon: 'G', color: 'bg-yellow-500', installed: false },
 ];
 
 interface ConnectWalletDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConnect: (selectedWalletName: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function ConnectWalletDialog({ open, onOpenChange, onConnect }: ConnectWalletDialogProps) {
-  const [selectedWallet, setSelectedWallet] = useState<string>(walletOptions[0].id); // Default to Phantom
+export function ConnectWalletDialog({ isOpen, onClose }: ConnectWalletDialogProps) {
+  const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const router = useRouter();
 
-  const handleContinue = () => {
-    const wallet = walletOptions.find(w => w.id === selectedWallet);
-    if (wallet) {
-      onConnect(wallet.name);
+  // Reset state when dialog opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedWallet(null);
+      setIsConnecting(false);
+      setConnectionStatus('idle');
+      setErrorMessage('');
+    }
+  }, [isOpen]);
+
+  const handleWalletSelect = async (walletName: string) => {
+    setSelectedWallet(walletName);
+    setIsConnecting(true);
+    setConnectionStatus('connecting');
+    setErrorMessage('');
+
+    try {
+      // Simulate wallet connection process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Check if wallet is installed (simulate)
+      const wallet = walletOptions.find(w => w.name === walletName);
+      if (!wallet?.installed && walletName !== 'Phantom') {
+        throw new Error(`${walletName} wallet is not installed. Please install it first.`);
+      }
+
+      // Simulate successful connection
+      setConnectionStatus('connected');
+      
+      // Store wallet connection in localStorage
+      localStorage.setItem('solcraft_wallet', JSON.stringify({
+        name: walletName,
+        address: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM', // Mock address
+        connected: true,
+        connectedAt: new Date().toISOString()
+      }));
+
+      // Wait a moment to show success state
+      setTimeout(() => {
+        onClose();
+        // Redirect to dashboard
+        router.push('/dashboard');
+      }, 1500);
+
+    } catch (error) {
+      setConnectionStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to connect wallet');
+      setIsConnecting(false);
+    }
+  };
+
+  const handleContinueWithoutWallet = () => {
+    // Store guest session
+    localStorage.setItem('solcraft_session', JSON.stringify({
+      type: 'guest',
+      connectedAt: new Date().toISOString()
+    }));
+    
+    onClose();
+    router.push('/dashboard');
+  };
+
+  const handleCancel = () => {
+    if (isConnecting) {
+      setIsConnecting(false);
+      setConnectionStatus('idle');
+      setSelectedWallet(null);
+    } else {
+      onClose();
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card text-card-foreground p-0 shadow-2xl rounded-xl">
-        <DialogHeader className="p-6 pb-4 text-center relative">
-          <div className="absolute top-4 right-4">
-            <DialogClose asChild>
-              <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted/50">
-                <X className="h-5 w-5 text-muted-foreground" />
-              </Button>
-            </DialogClose>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="p-3 bg-primary/10 rounded-lg mb-3">
-              <WalletIcon className="h-7 w-7 text-primary" />
-            </div>
-            <DialogTitle className="text-xl font-semibold text-foreground">
-              Connect Wallet
-            </DialogTitle>
-          </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Wallet className="h-5 w-5" />
+            Connect Wallet
+          </DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4"
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </DialogHeader>
 
-        <div className="px-6 py-2 space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {walletOptions.map((wallet) => (
-              <button
-                key={wallet.id}
-                onClick={() => setSelectedWallet(wallet.id)}
-                className={cn(
-                  "flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg border-2 transition-all duration-150 ease-in-out aspect-square",
-                  "bg-muted/30 hover:bg-muted/60",
-                  selectedWallet === wallet.id ? "border-primary" : "border-border hover:border-muted-foreground/50"
-                )}
-              >
-                <Image
-                  src={wallet.iconUrl}
-                  alt={`${wallet.name} icon`}
-                  width={32}
-                  height={32}
-                  className="mb-1 sm:mb-2 rounded-md h-8 w-8 sm:h-10 sm:w-10"
-                  data-ai-hint={wallet.aiHint}
-                  onError={(e) => { 
-                    const target = e.target as HTMLImageElement;
-                    target.srcset = ""; // Prevent Next.js from trying to use srcset for placeholder
-                    target.src = 'https://placehold.co/48x48.png?text=W'; 
-                    target.alt = `${wallet.name} Placeholder Icon`;
-                  }}
-                />
-                <span className="text-xs sm:text-sm font-medium text-foreground text-center">{wallet.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <div className="space-y-4">
+          {connectionStatus === 'connecting' && (
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="flex items-center space-x-3 p-4">
+                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                <div>
+                  <p className="font-medium text-blue-900">Connecting to {selectedWallet}...</p>
+                  <p className="text-sm text-blue-700">Please approve the connection in your wallet.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-        <DialogFooter className="p-6 pt-4 flex flex-col sm:flex-row sm:justify-between gap-3">
-          <DialogClose asChild>
-            <Button type="button" variant="outline" className="w-full sm:w-auto h-11 text-base bg-muted/50 hover:bg-muted/80 border-muted-foreground/30 hover:border-muted-foreground/60 text-muted-foreground hover:text-foreground">
-              Cancel
+          {connectionStatus === 'connected' && (
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="flex items-center space-x-3 p-4">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <div>
+                  <p className="font-medium text-green-900">Successfully connected!</p>
+                  <p className="text-sm text-green-700">Redirecting to dashboard...</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {connectionStatus === 'error' && (
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="flex items-center space-x-3 p-4">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+                <div>
+                  <p className="font-medium text-red-900">Connection failed</p>
+                  <p className="text-sm text-red-700">{errorMessage}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {connectionStatus === 'idle' && (
+            <div className="grid grid-cols-3 gap-3">
+              {walletOptions.map((wallet) => (
+                <Button
+                  key={wallet.name}
+                  variant="outline"
+                  className="h-20 flex-col space-y-2 hover:bg-muted"
+                  onClick={() => handleWalletSelect(wallet.name)}
+                  disabled={isConnecting}
+                >
+                  <div className={`w-8 h-8 rounded-lg ${wallet.color} flex items-center justify-center text-white font-bold`}>
+                    {wallet.icon}
+                  </div>
+                  <span className="text-xs">{wallet.name}</span>
+                  {!wallet.installed && (
+                    <span className="text-xs text-muted-foreground">Not installed</span>
+                  )}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex space-x-2 pt-4">
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={connectionStatus === 'connected'}
+              className="flex-1"
+            >
+              {isConnecting ? 'Cancel' : 'Cancel'}
             </Button>
-          </DialogClose>
-          <Button onClick={handleContinue} className="w-full sm:w-auto h-11 text-base" disabled={!selectedWallet}>
-            Continue
-          </Button>
-        </DialogFooter>
+            <Button
+              onClick={handleContinueWithoutWallet}
+              disabled={isConnecting || connectionStatus === 'connected'}
+              className="flex-1"
+            >
+              Continue
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center">
+            By connecting a wallet, you agree to our Terms of Service and Privacy Policy.
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
+
