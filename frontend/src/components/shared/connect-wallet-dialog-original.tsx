@@ -25,12 +25,11 @@ const walletOptions: WalletOption[] = [
 ];
 
 interface ConnectWalletDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConnect?: (walletName: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function ConnectWalletDialog({ open, onOpenChange, onConnect }: ConnectWalletDialogProps) {
+export function ConnectWalletDialog({ isOpen, onClose }: ConnectWalletDialogProps) {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
@@ -39,13 +38,13 @@ export function ConnectWalletDialog({ open, onOpenChange, onConnect }: ConnectWa
 
   // Reset state when dialog opens/closes
   useEffect(() => {
-    if (!open) {
+    if (!isOpen) {
       setSelectedWallet(null);
       setIsConnecting(false);
       setConnectionStatus('idle');
       setErrorMessage('');
     }
-  }, [open]);
+  }, [isOpen]);
 
   const handleWalletSelect = async (walletName: string) => {
     setSelectedWallet(walletName);
@@ -74,14 +73,9 @@ export function ConnectWalletDialog({ open, onOpenChange, onConnect }: ConnectWa
         connectedAt: new Date().toISOString()
       }));
 
-      // Call onConnect callback if provided
-      if (onConnect) {
-        onConnect(walletName);
-      }
-
       // Wait a moment to show success state
       setTimeout(() => {
-        onOpenChange(false);
+        onClose();
         // Redirect to dashboard
         router.push('/dashboard');
       }, 1500);
@@ -100,7 +94,7 @@ export function ConnectWalletDialog({ open, onOpenChange, onConnect }: ConnectWa
       connectedAt: new Date().toISOString()
     }));
     
-    onOpenChange(false);
+    onClose();
     router.push('/dashboard');
   };
 
@@ -110,12 +104,12 @@ export function ConnectWalletDialog({ open, onOpenChange, onConnect }: ConnectWa
       setConnectionStatus('idle');
       setSelectedWallet(null);
     } else {
-      onOpenChange(false);
+      onClose();
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -126,7 +120,7 @@ export function ConnectWalletDialog({ open, onOpenChange, onConnect }: ConnectWa
             variant="ghost"
             size="icon"
             className="absolute right-4 top-4"
-            onClick={() => onOpenChange(false)}
+            onClick={onClose}
           >
             <X className="h-4 w-4" />
           </Button>
