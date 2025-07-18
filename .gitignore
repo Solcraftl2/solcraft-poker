@@ -9,6 +9,7 @@ yarn-error.log*
 frontend/.next/
 frontend/out/
 frontend/build/
+frontend_backup/
 backend/dist/
 backend/build/
 
