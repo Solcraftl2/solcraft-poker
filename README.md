@@ -107,7 +107,7 @@ Il backend può essere deployato su Railway, Heroku o servizi simili.
 
 ## Licenza
 
-Questo progetto è proprietario di SolCraft Team.
+Questo progetto è **proprietario di SolCraft Team** e non è concesso in licenza per la ridistribuzione.
 
 ## Contatti
 
