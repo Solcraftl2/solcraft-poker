@@ -70,9 +70,11 @@ cd backend && pip install -r requirements.txt && cd ..
 cp frontend/.env.example frontend/.env.local
 # Modifica frontend/.env.local con le tue configurazioni
 
-# Backend  
+# Backend
 cp backend/.env.example backend/.env
 # Modifica backend/.env con le tue configurazioni
+# I file `.env.example` contengono tutte le variabili necessarie
+# riportate nei README (ad es. `NEXT_PUBLIC_FIREBASE_API_KEY`, `SUPABASE_URL`).
 ```
 
 ### 5. Testa il Setup
