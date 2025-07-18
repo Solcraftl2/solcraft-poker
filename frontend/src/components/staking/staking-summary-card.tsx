@@ -4,6 +4,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { StakingSummary } from "@/lib/types";
 import { DollarSign, TrendingUp, Layers, Percent, BarChart } from "lucide-react"; // Added BarChart for average APY
+import type { LucideIcon } from "lucide-react";
 
 interface StakingSummaryCardProps {
   summary: StakingSummary;
