@@ -66,6 +66,7 @@ cd backend && pip install -r requirements.txt && cd ..
 # Copia e configura variabili d'ambiente
 cp frontend/.env.example frontend/.env.local
 cp backend/.env.example backend/.env
+# Modifica i file appena copiati inserendo le tue chiavi e URL
 ```
 
 4. **Avvia i servizi**
