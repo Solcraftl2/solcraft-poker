@@ -13,6 +13,8 @@ solcraft-poker/
 └── .gitignore         # File da ignorare
 ```
 
+_Nota: la vecchia cartella `frontend_backup` è stata rimossa perché non più necessaria._
+
 ## Componenti
 
 ### Frontend (`/frontend`)
